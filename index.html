@@ -3,326 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CrewCal — Airline Schedule Parser</title>
+<title>CrewCal</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --card: #161a22;
-    --border: #1e2330;
-    --accent: #e8c84a;
-    --accent2: #4a8fe8;
-    --green: #4ae8a0;
-    --red: #e84a6a;
-    --text: #e8eaf0;
-    --muted: #5a6070;
-    --off-bg: #0e1016;
-    --off-border: #181c24;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
-  body::before {
-    content:''; position:fixed; inset:0;
-    background-image: linear-gradient(rgba(232,200,74,0.02) 1px,transparent 1px), linear-gradient(90deg,rgba(232,200,74,0.02) 1px,transparent 1px);
-    background-size:48px 48px; pointer-events:none; z-index:0;
-  }
+:root {
+  --bg:#0a0c10; --surface:#111318; --card:#161a22; --border:#1e2330;
+  --accent:#e8c84a; --accent2:#4a8fe8; --green:#4ae8a0; --red:#e84a6a;
+  --text:#e8eaf0; --muted:#5a6070; --off-bg:#0e1016; --off-border:#181c24;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(232,200,74,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(232,200,74,.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
 
-  /* ═══════════════════════════════
-     PASTE SCREEN
-  ═══════════════════════════════ */
-  #paste-screen {
-    position:relative; z-index:1; min-height:100vh;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px;
-  }
-  .brand {
-    font-family:'Bebas Neue',sans-serif; font-size:clamp(48px,8vw,96px);
-    letter-spacing:0.06em; line-height:1; margin-bottom:6px;
-    background:linear-gradient(135deg,var(--accent),#f0a030);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  }
-  .brand-sub {
-    font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.2em;
-    color:var(--muted); text-transform:uppercase; margin-bottom:48px; text-align:center;
-  }
-  .paste-card {
-    width:100%; max-width:680px; background:rgba(22,26,34,0.8);
-    border:1px solid var(--border); border-radius:16px; padding:32px; position:relative;
-  }
-  .paste-card label {
-    font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.16em;
-    text-transform:uppercase; color:var(--muted); display:block; margin-bottom:12px;
-  }
-  .paste-card label span {
-    color:var(--accent); margin-left:6px;
-  }
-  textarea {
-    width:100%; height:220px; background:#0c0e14; border:1px solid var(--border);
-    border-radius:8px; color:var(--text); font-family:'DM Mono',monospace; font-size:11px;
-    line-height:1.6; padding:14px; resize:vertical; outline:none;
-    transition:border-color 0.2s; letter-spacing:0.02em;
-  }
-  textarea:focus { border-color:rgba(232,200,74,0.4); }
-  textarea::placeholder { color:#2a3040; }
-  .paste-actions { display:flex; gap:12px; margin-top:16px; align-items:center; flex-wrap:wrap; }
-  .btn-primary {
-    font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:0.1em;
-    background:var(--accent); color:#0a0c10; border:none; border-radius:8px;
-    padding:10px 32px; cursor:pointer; transition:all 0.2s; flex-shrink:0;
-  }
-  .btn-primary:hover { background:#f0d060; transform:translateY(-1px); }
-  .btn-primary:active { transform:translateY(0); }
-  .paste-hint {
-    font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
-    letter-spacing:0.06em; line-height:1.6;
-  }
+/* PASTE SCREEN */
+#paste-screen{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,8vw,96px);letter-spacing:.06em;line-height:1;margin-bottom:6px;background:linear-gradient(135deg,var(--accent),#f0a030);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-sub{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:48px;text-align:center;}
+.paste-card{width:100%;max-width:680px;background:rgba(22,26,34,.8);border:1px solid var(--border);border-radius:16px;padding:32px;}
+.paste-card label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:12px;}
+textarea{width:100%;height:220px;background:#0c0e14;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;padding:14px;resize:vertical;outline:none;transition:border-color .2s;}
+textarea:focus{border-color:rgba(232,200,74,.4);}
+textarea::placeholder{color:#2a3040;}
+.paste-actions{display:flex;gap:12px;margin-top:16px;align-items:center;flex-wrap:wrap;}
+.btn-primary{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.1em;background:var(--accent);color:#0a0c10;border:none;border-radius:8px;padding:10px 32px;cursor:pointer;transition:all .2s;}
+.btn-primary:hover{background:#f0d060;transform:translateY(-1px);}
+.paste-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.06em;line-height:1.6;}
+.how-to{width:100%;max-width:680px;margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.how-step{background:rgba(22,26,34,.5);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.how-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1;margin-bottom:6px;}
+.how-text{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.06em;line-height:1.5;}
+#error-msg{display:none;margin-top:16px;background:rgba(232,74,106,.1);border:1px solid rgba(232,74,106,.3);border-radius:8px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--red);letter-spacing:.06em;}
+#error-msg.show{display:block;}
 
-  .how-to {
-    width:100%; max-width:680px; margin-top:28px;
-    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
-  }
-  .how-step {
-    background:rgba(22,26,34,0.5); border:1px solid var(--border); border-radius:10px;
-    padding:16px; text-align:center;
-  }
-  .how-num {
-    font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--accent);
-    line-height:1; margin-bottom:6px;
-  }
-  .how-text {
-    font-family:'DM Mono',monospace; font-size:10px; color:var(--muted);
-    letter-spacing:0.06em; line-height:1.5;
-  }
+/* CALENDAR SCREEN */
+#cal-screen{display:none;position:relative;z-index:1;padding:32px 20px 60px;}
+#cal-screen.show{display:block;}
+.page-wrap{max-width:1140px;margin:0 auto;}
+.top-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:12px;}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.1em;color:var(--accent);opacity:.7;}
+.btn-back{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:6px;padding:8px 16px;cursor:pointer;transition:all .2s;}
+.btn-back:hover{border-color:var(--accent);color:var(--accent);}
 
-  #error-msg {
-    display:none; margin-top:16px; background:rgba(232,74,106,0.1);
-    border:1px solid rgba(232,74,106,0.3); border-radius:8px; padding:12px 16px;
-    font-family:'DM Mono',monospace; font-size:11px; color:var(--red); letter-spacing:0.06em;
-  }
-  #error-msg.show { display:block; }
+/* CAL HEADER */
+.cal-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:20px;}
+.tag{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.tag::before{content:'';display:inline-block;width:20px;height:1px;background:var(--accent);}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,6vw,76px);letter-spacing:.04em;line-height:.9;}
+h1 span{color:var(--accent);}
+.sub{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);margin-top:8px;letter-spacing:.08em;}
+.stats{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;}
+.stat{text-align:right;}
+.stat-l{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.stat-v{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--accent);}
+.stat-v.hol{color:var(--green);}
 
-  /* ═══════════════════════════════
-     CALENDAR SCREEN
-  ═══════════════════════════════ */
-  #cal-screen { display:none; position:relative; z-index:1; padding:32px 20px 60px; }
-  #cal-screen.show { display:block; }
-  .page-wrap { max-width:1140px; margin:0 auto; }
+/* LEGEND */
+.legend{display:flex;gap:18px;margin-bottom:24px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.05em;}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 
-  .top-nav {
-    display:flex; justify-content:space-between; align-items:center;
-    margin-bottom:32px; flex-wrap:wrap; gap:12px;
-  }
-  .nav-brand { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.1em; color:var(--accent); opacity:0.7; }
-  .btn-back {
-    font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.1em;
-    text-transform:uppercase; color:var(--muted); background:transparent;
-    border:1px solid var(--border); border-radius:6px; padding:8px 16px;
-    cursor:pointer; transition:all 0.2s;
-  }
-  .btn-back:hover { border-color:var(--accent); color:var(--accent); }
+/* DOW */
+.dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px;}
+.dow{text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:8px 0;}
 
-  /* header */
-  .cal-header {
-    display:flex; align-items:flex-end; justify-content:space-between;
-    margin-bottom:36px; padding-bottom:24px; border-bottom:1px solid var(--border);
-    flex-wrap:wrap; gap:20px;
-  }
-  .tag { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.18em; color:var(--accent); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-  .tag::before { content:''; display:inline-block; width:20px; height:1px; background:var(--accent); }
-  h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(44px,6vw,76px); letter-spacing:0.04em; line-height:0.9; }
-  h1 span { color:var(--accent); }
-  .sub { font-family:'DM Mono',monospace; font-size:13px; color:var(--muted); margin-top:8px; letter-spacing:0.08em; }
-  .stats { display:flex; gap:20px; flex-wrap:wrap; align-items:flex-end; }
-  .stat { text-align:right; }
-  .stat-l { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em; color:var(--muted); text-transform:uppercase; margin-bottom:3px; }
-  .stat-v { font-family:'DM Mono',monospace; font-size:18px; font-weight:500; color:var(--accent); }
-  .stat-v.holiday { color:var(--green); }
+/* CELLS */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.dc{background:var(--card);border:1px solid var(--border);border-radius:8px;min-height:112px;padding:9px 9px 7px;position:relative;overflow:visible;transition:border-color .18s,transform .15s;}
+.dc:hover{border-color:#3a4050;transform:translateY(-1px);z-index:50;}
+.dc.empty{background:transparent;border-color:transparent;min-height:0;}
+.dc.empty:hover{transform:none;border-color:transparent;}
+.dc.off{background:var(--off-bg);border-color:var(--off-border);}
+.dc.off .dn{color:#2e3440;}
+.dc.pstart{background:linear-gradient(160deg,#161a22,#191e2a);border-color:rgba(232,200,74,.3);}
+.dc.pstart::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;}
+.dc.pcont{background:linear-gradient(160deg,#161a22,#191e2a);border-color:rgba(232,200,74,.3);}
+.dc.pcont::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);border-radius:8px 8px 0 0;}
+.dc.p2start{background:linear-gradient(160deg,#161a22,#151d2a);border-color:rgba(74,143,232,.3);}
+.dc.p2start::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2);border-radius:8px 8px 0 0;}
+.dc.p2cont{background:linear-gradient(160deg,#161a22,#151d2a);border-color:rgba(74,143,232,.3);}
+.dc.p2cont::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent2);border-radius:8px 8px 0 0;}
+.dc.prior{background:#0c0e14;border:1px dashed #252a36;opacity:.65;}
+.dc.prior::before{display:none;}
+.dc.hol-worked::after{content:'★';position:absolute;top:6px;right:8px;font-size:8px;color:var(--green);opacity:.8;}
+.dn{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:5px;}
+.dc.pstart .dn,.dc.pcont .dn,.dc.p2start .dn,.dc.p2cont .dn{color:var(--text);}
+.dc.prior .dn{color:#3a4050;}
+.off-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#2a3040;}
+.hol-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(232,200,74,.35);margin-top:3px;display:block;}
+.prior-stamp{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#3a4a5a;background:rgba(74,143,232,.06);border:1px solid rgba(74,143,232,.12);border-radius:3px;padding:1px 5px;margin-bottom:4px;}
+.pcode{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.04em;color:var(--accent);line-height:1;margin-bottom:3px;}
+.pcode.cont{color:var(--accent);font-size:16px;}
+.pcode.p2{color:var(--accent2);font-size:19px;}
+.pcode.p2cont{color:var(--accent2);font-size:16px;}
+.pcode.prior-c{color:#3a6070;font-size:16px;}
+.trow{display:flex;justify-content:space-between;}
+.tv{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
+.tv.rpt{color:rgba(232,200,74,.75);}
+.tv.rel{color:rgba(232,200,74,.75);}
+.tv.rpt2{color:rgba(74,143,232,.85);}
+.tv.rel2{color:rgba(74,143,232,.85);}
+.tv.rel-p{color:rgba(74,143,232,.45);}
+.lbadge{display:inline-flex;align-items:center;background:rgba(232,200,74,.08);border:1px solid rgba(232,200,74,.2);border-radius:4px;padding:2px 6px;margin-top:5px;font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.08em;}
+.lbadge.b{background:rgba(74,143,232,.1);border:1px solid rgba(74,143,232,.2);color:var(--accent2);}
+.cred{font-family:'DM Mono',monospace;font-size:9px;color:var(--green);margin-top:4px;}
 
-  /* legend */
-  .legend { display:flex; gap:18px; margin-bottom:24px; flex-wrap:wrap; }
-  .leg { display:flex; align-items:center; gap:7px; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:0.05em; }
-  .leg-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+/* TOOLTIP */
+.tt{display:none;position:absolute;top:calc(100% + 8px);left:0;width:290px;background:#1a1f2e;border:1px solid #2a3040;border-radius:10px;padding:14px;z-index:999;box-shadow:0 20px 60px rgba(0,0,0,.7);pointer-events:none;}
+.dc:nth-child(7n+5) .tt,.dc:nth-child(7n+6) .tt,.dc:nth-child(7n+0) .tt{left:auto;right:0;}
+.dc:hover .tt{display:block;}
+.tt-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #2a3040;}
+.tt-code{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:.04em;line-height:1;}
+.tt-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:right;line-height:1.5;}
+.tt-legs{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.tt-leg{display:flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:10px;}
+.tt-fnum{color:var(--muted);font-size:9px;width:30px;}
+.tt-from{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--text);letter-spacing:.04em;}
+.tt-arrow{color:var(--muted);flex:1;text-align:center;font-size:9px;}
+.tt-to{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--text);letter-spacing:.04em;}
+.tt-dep{color:rgba(232,200,74,.7);font-size:9px;width:34px;text-align:right;}
+.tt-arr{color:rgba(74,232,160,.7);font-size:9px;width:34px;text-align:right;}
+.tt-div{border:none;border-top:1px solid #2a3040;margin:8px 0;}
+.tt-row{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;padding:2px 0;}
+.tt-lbl{color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase;}
+.tt-val{color:var(--text);}
+.tt-val.g{color:var(--accent);}
+.tt-val.b{color:var(--accent2);}
+.tt-val.gr{color:var(--green);}
+.tt-hotel{margin-top:8px;padding-top:8px;border-top:1px solid #2a3040;}
+.tt-hotel-name{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--text);margin-bottom:2px;}
+.tt-hotel-ph{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent2);}
+.tt-hol{margin-top:8px;padding-top:8px;border-top:1px solid #2a3040;font-family:'DM Mono',monospace;font-size:9px;color:var(--green);letter-spacing:.08em;}
 
-  /* dow */
-  .dow-row { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:3px; }
-  .dow { text-align:center; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); padding:8px 0; }
+/* PAIRING CARDS */
+.summary{margin-top:44px;border-top:1px solid var(--border);padding-top:32px;}
+.summary h2{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:.06em;margin-bottom:20px;}
+.pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 18px 16px;position:relative;overflow:hidden;}
+.pcard::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--pcolor,var(--accent));}
+.pc-code{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:.04em;color:var(--pcolor,var(--accent));line-height:1;}
+.pc-dates{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;margin-bottom:12px;}
+.route{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.apt{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.06em;color:var(--text);}
+.rt-arr{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.ps{background:var(--surface);border-radius:6px;padding:7px 8px;}
+.ps-l{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px;}
+.ps-v{font-family:'DM Mono',monospace;font-size:13px;color:var(--text);font-weight:500;}
+.pills{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;}
+.pill-lay{display:inline-flex;align-items:center;background:rgba(74,143,232,.1);border:1px solid rgba(74,143,232,.2);border-radius:20px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2);}
+.pill-cr{display:inline-flex;align-items:center;background:rgba(74,232,160,.08);border:1px solid rgba(74,232,160,.15);border-radius:20px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--green);}
+.pill-hol{display:inline-flex;align-items:center;background:rgba(232,200,74,.08);border:1px solid rgba(232,200,74,.2);border-radius:20px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);}
 
-  /* ═══════════════════════════════
-     CALENDAR CELLS
-  ═══════════════════════════════ */
-  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+/* HOLIDAY SECTION */
+.hol-section{margin-top:32px;border-top:1px solid var(--border);padding-top:28px;}
+.hol-section h2{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.06em;margin-bottom:16px;color:var(--green);}
+.hol-cards{display:flex;gap:12px;flex-wrap:wrap;}
+.hol-card{background:rgba(74,232,160,.05);border:1px solid rgba(74,232,160,.15);border-radius:10px;padding:12px 16px;}
+.hol-name{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
+.hol-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.hol-bonus{font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);margin-top:2px;}
 
-  .dc {
-    background:var(--card); border:1px solid var(--border); border-radius:8px;
-    min-height:112px; padding:9px 9px 7px; position:relative; overflow:visible;
-    transition:border-color 0.18s, transform 0.15s;
-  }
-  .dc:hover { border-color:#3a4050; transform:translateY(-1px); z-index:50; }
-  .dc.empty { background:transparent; border-color:transparent; min-height:0; }
-  .dc.empty:hover { transform:none; border-color:transparent; }
-
-  .dc.off { background:var(--off-bg); border-color:var(--off-border); }
-  .dc.off .dn { color:#2e3440; }
-
-  /* holiday ring on off days */
-  .dc.holiday-off { box-shadow:inset 0 0 0 1px rgba(232,200,74,0.15); }
-
-  .dc.pstart { background:linear-gradient(160deg,#161a22,#191e2a); border-color:rgba(232,200,74,0.3); }
-  .dc.pstart::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:var(--accent); border-radius:8px 8px 0 0; }
-
-  .dc.pcont { background:linear-gradient(160deg,#161a22,#151d2a); border-color:rgba(74,143,232,0.3); }
-  .dc.pcont::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; background:var(--accent2); border-radius:8px 8px 0 0; }
-
-  /* holiday worked — green accent dot in corner */
-  .dc.holiday-worked::after {
-    content:'★'; position:absolute; top:6px; right:8px;
-    font-size:8px; color:var(--green); opacity:0.8;
-  }
-
-  .dc.prior { background:#0c0e14; border:1px dashed #252a36; opacity:0.65; }
-  .dc.prior::before { display:none; }
-
-  .dn { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:var(--muted); margin-bottom:5px; }
-  .dc.pstart .dn, .dc.pcont .dn { color:var(--text); }
-  .dc.prior .dn { color:#3a4050; }
-
-  .off-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:0.12em; text-transform:uppercase; color:#2a3040; }
-  .holiday-lbl { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(232,200,74,0.4); margin-top:3px; display:block; }
-  .prior-stamp { display:inline-block; font-family:'DM Mono',monospace; font-size:8px; letter-spacing:0.1em; text-transform:uppercase; color:#3a4a5a; background:rgba(74,143,232,0.06); border:1px solid rgba(74,143,232,0.12); border-radius:3px; padding:1px 5px; margin-bottom:4px; }
-
-  .pcode { font-family:'Bebas Neue',sans-serif; font-size:19px; letter-spacing:0.04em; color:var(--accent); line-height:1; margin-bottom:3px; }
-  .pcode.cont { color:var(--accent2); font-size:16px; }
-  .pcode.prior-c { color:#3a6070; font-size:16px; }
-
-  .trow { display:flex; justify-content:space-between; }
-  .tv { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
-  .tv.rpt { color:rgba(232,200,74,0.75); }
-  .tv.rel { color:rgba(74,143,232,0.85); }
-  .tv.rel-prior { color:rgba(74,143,232,0.45); }
-
-  .lbadge { display:inline-flex; align-items:center; gap:3px; background:rgba(74,143,232,0.1); border:1px solid rgba(74,143,232,0.2); border-radius:4px; padding:2px 6px; margin-top:5px; font-family:'DM Mono',monospace; font-size:10px; font-weight:500; color:var(--accent2); letter-spacing:0.08em; }
-  .cred { font-family:'DM Mono',monospace; font-size:9px; color:var(--green); margin-top:4px; }
-
-  /* ═══════════════════════════════
-     HOVER TOOLTIP
-  ═══════════════════════════════ */
-  .tt {
-    display:none; position:absolute; top:calc(100% + 8px); left:0;
-    width:290px; background:#1a1f2e; border:1px solid #2a3040;
-    border-radius:10px; padding:14px; z-index:999;
-    box-shadow:0 20px 60px rgba(0,0,0,0.7); pointer-events:none;
-  }
-  .dc:nth-child(7n+5) .tt,
-  .dc:nth-child(7n+6) .tt,
-  .dc:nth-child(7n+0) .tt { left:auto; right:0; }
-  .dc:hover .tt { display:block; }
-
-  .tt-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid #2a3040; }
-  .tt-code { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); letter-spacing:0.04em; line-height:1; }
-  .tt-meta { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); text-align:right; line-height:1.5; }
-
-  .tt-legs { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
-  .tt-leg { display:flex; align-items:center; gap:4px; font-family:'DM Mono',monospace; font-size:10px; }
-  .tt-fnum { color:var(--muted); font-size:9px; width:30px; }
-  .tt-from { font-family:'Bebas Neue',sans-serif; font-size:13px; color:var(--text); letter-spacing:0.04em; }
-  .tt-arrow { color:var(--muted); flex:1; text-align:center; font-size:9px; }
-  .tt-to { font-family:'Bebas Neue',sans-serif; font-size:13px; color:var(--text); letter-spacing:0.04em; }
-  .tt-dep { color:rgba(232,200,74,0.7); font-size:9px; width:34px; text-align:right; }
-  .tt-arr { color:rgba(74,232,160,0.7); font-size:9px; width:34px; text-align:right; }
-
-  .tt-div { border:none; border-top:1px solid #2a3040; margin:8px 0; }
-  .tt-row { display:flex; justify-content:space-between; font-family:'DM Mono',monospace; font-size:10px; padding:2px 0; }
-  .tt-lbl { color:var(--muted); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; }
-  .tt-val { color:var(--text); }
-  .tt-val.g { color:var(--accent); }
-  .tt-val.b { color:var(--accent2); }
-  .tt-val.gr { color:var(--green); }
-
-  .tt-hotel { margin-top:8px; padding-top:8px; border-top:1px solid #2a3040; }
-  .tt-hotel-name { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--text); margin-bottom:2px; }
-  .tt-hotel-ph { font-family:'DM Mono',monospace; font-size:10px; color:var(--accent2); }
-
-  .tt-holiday { margin-top:8px; padding-top:8px; border-top:1px solid #2a3040; font-family:'DM Mono',monospace; font-size:9px; color:var(--green); letter-spacing:0.08em; }
-
-  /* ═══════════════════════════════
-     PAIRING CARDS
-  ═══════════════════════════════ */
-  .summary { margin-top:44px; border-top:1px solid var(--border); padding-top:32px; }
-  .summary h2 { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:0.06em; margin-bottom:20px; }
-  .pcards { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; }
-  .pcard { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:18px 18px 16px; position:relative; overflow:hidden; }
-  .pcard::before { content:''; position:absolute; top:0;left:0; width:3px; height:100%; background:var(--accent); }
-  .pc-code { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:0.04em; color:var(--accent); line-height:1; }
-  .pc-dates { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:12px; }
-  .route { display:flex; align-items:center; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
-  .apt { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:0.06em; color:var(--text); }
-  .rt-arr { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
-  .pstats { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
-  .ps { background:var(--surface); border-radius:6px; padding:7px 8px; }
-  .ps-l { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:2px; }
-  .ps-v { font-family:'DM Mono',monospace; font-size:13px; color:var(--text); font-weight:500; }
-  .pills { margin-top:10px; display:flex; gap:6px; flex-wrap:wrap; }
-  .pill-lay { display:inline-flex; align-items:center; gap:4px; background:rgba(74,143,232,0.1); border:1px solid rgba(74,143,232,0.2); border-radius:20px; padding:3px 10px; font-family:'DM Mono',monospace; font-size:11px; color:var(--accent2); }
-  .pill-cr { display:inline-flex; align-items:center; gap:4px; background:rgba(74,232,160,0.08); border:1px solid rgba(74,232,160,0.15); border-radius:20px; padding:3px 10px; font-family:'DM Mono',monospace; font-size:11px; color:var(--green); }
-  .pill-hol { display:inline-flex; align-items:center; gap:4px; background:rgba(232,200,74,0.08); border:1px solid rgba(232,200,74,0.2); border-radius:20px; padding:3px 10px; font-family:'DM Mono',monospace; font-size:11px; color:var(--accent); }
-
-  /* holiday summary section */
-  .holiday-section { margin-top:32px; border-top:1px solid var(--border); padding-top:28px; }
-  .holiday-section h2 { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.06em; margin-bottom:16px; color:var(--green); }
-  .hol-cards { display:flex; gap:12px; flex-wrap:wrap; }
-  .hol-card { background:rgba(74,232,160,0.05); border:1px solid rgba(74,232,160,0.15); border-radius:10px; padding:12px 16px; }
-  .hol-name { font-family:'DM Mono',monospace; font-size:10px; color:var(--green); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:3px; }
-  .hol-date { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
-  .hol-bonus { font-family:'DM Mono',monospace; font-size:11px; color:var(--accent); margin-top:2px; }
-
-  @media(max-width:640px){
-    .dc { min-height:85px; padding:7px 6px; }
-    .pcode { font-size:14px; }
-    .tv { font-size:9px; }
-    .lbadge { font-size:9px; }
-    .how-to { grid-template-columns:1fr; }
-    .tt { width:240px; }
-  }
+@media(max-width:640px){
+  .dc{min-height:85px;padding:7px 6px;}
+  .pcode{font-size:14px;}
+  .tv{font-size:9px;}
+  .lbadge{font-size:9px;}
+  .how-to{grid-template-columns:1fr;}
+  .tt{width:240px;}
+}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     PASTE SCREEN
-═══════════════════════════════════════ -->
 <div id="paste-screen">
   <div class="brand">CrewCal</div>
   <div class="brand-sub">Sabre CrewTrac Schedule Parser</div>
-
   <div class="paste-card">
-    <label>Schedule Detail Report Text <span>— paste below</span></label>
-    <textarea id="sched-input" placeholder="625778 SCHULZ,ZACHARY JOHN SEN# 02550 BID EWR EM7 FO&#10;PERIOD 0326 TIMES ARE IN LOCAL&#10;02 MAR OFF&#10;03 MAR OFF&#10;...&#10;09 MAR R7373 /0309 POS FO DAY 01 REPORT 1614&#10;3654 EWR SAV 1100 1330&#10;..."></textarea>
+    <label>Schedule Detail Report <span style="color:var(--accent)">— paste below</span></label>
+    <textarea id="sched-input" placeholder="Paste Schedule Here"></textarea>
     <div class="paste-actions">
       <button class="btn-primary" onclick="handleParse()">BUILD CALENDAR</button>
       <div class="paste-hint">Paste the full text from your<br>Sabre Schedule Detail Report</div>
     </div>
     <div id="error-msg"></div>
   </div>
-
   <div class="how-to">
-    <div class="how-step">
-      <div class="how-num">1</div>
-      <div class="how-text">Open Sabre CrewTrac<br>Schedule Detail Report</div>
-    </div>
-    <div class="how-step">
-      <div class="how-num">2</div>
-      <div class="how-text">Select All text<br>and Copy</div>
-    </div>
-    <div class="how-step">
-      <div class="how-num">3</div>
-      <div class="how-text">Paste here and hit<br>Build Calendar</div>
-    </div>
+    <div class="how-step"><div class="how-num">1</div><div class="how-text">Open Sabre CrewTrac<br>Schedule Detail Report</div></div>
+    <div class="how-step"><div class="how-num">2</div><div class="how-text">Select All text<br>and Copy</div></div>
+    <div class="how-step"><div class="how-num">3</div><div class="how-text">Paste here and hit<br>Build Calendar</div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     CALENDAR SCREEN
-═══════════════════════════════════════ -->
 <div id="cal-screen">
   <div class="page-wrap">
     <div class="top-nav">
@@ -336,201 +207,161 @@
 <script>
 'use strict';
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // CONSTANTS
-// ═══════════════════════════════════════
-const HOLIDAY_BONUS_MIN = 4 * 60 + 12; // 252 minutes per your contract
+// ═══════════════════════════════════════════════════
+const HOLIDAY_BONUS_MIN = 252; // 4h12 per your contract
 
-const MONTH_MAP = {
-  JAN:0, FEB:1, MAR:2, APR:3, MAY:4, JUN:5,
-  JUL:6, AUG:7, SEP:8, OCT:9, NOV:10, DEC:11
-};
-const MONTH_NAMES = ['January','February','March','April','May','June',
-                     'July','August','September','October','November','December'];
-const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN',
-                     'JUL','AUG','SEP','OCT','NOV','DEC'];
+const MONTH_MAP = {JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
-// ═══════════════════════════════════════
-// HOLIDAY DETECTION (ported from your Python)
-// ═══════════════════════════════════════
-function easterDate(year) {
-  const a = year % 19, b = Math.floor(year/100), c = year % 100;
-  const d = Math.floor(b/4), e = b % 4, f = Math.floor((b+8)/25);
-  const g = Math.floor((b-f+1)/3);
-  const h = (19*a + b - d - g + 15) % 30;
-  const i = Math.floor(c/4), k = c % 4;
-  const l = (32 + 2*e + 2*i - h - k) % 7;
-  const m = Math.floor((a + 11*h + 22*l) / 451);
-  const month = Math.floor((h + l - 7*m + 114) / 31) - 1;
-  const day = ((h + l - 7*m + 114) % 31) + 1;
-  return new Date(year, month, day);
-}
-
-function superBowlSunday(year) {
-  // Second Sunday of February
-  let d = new Date(year, 1, 1);
-  while (d.getDay() !== 0) d = new Date(d.getTime() + 86400000);
-  return new Date(d.getTime() + 7*86400000);
-}
-
-function getHolidayName(dateObj) {
-  const y = dateObj.getFullYear(), m = dateObj.getMonth(), d = dateObj.getDate();
-  const dow = dateObj.getDay();
-
-  // Fixed dates
-  if (m===0 && d===1)  return "New Year's Day";
-  if (m===6 && d===4)  return "Independence Day";
-  if (m===11 && d===25) return "Christmas Day";
-
-  // Memorial Day: last Monday of May
-  if (m===4 && dow===1) {
-    const next = new Date(y,4,d+7);
-    if (next.getMonth() !== 4) return "Memorial Day";
-  }
-
-  // Labor Day: first Monday of September
-  if (m===8 && dow===1 && d<=7) return "Labor Day";
-
-  // Thanksgiving: 4th Thursday of November
-  if (m===10 && dow===4) {
-    const thursdays = [];
-    for (let x=1; x<=30; x++) {
-      if (new Date(y,10,x).getDay()===4) thursdays.push(x);
-    }
-    if (d === thursdays[3]) return "Thanksgiving";
-  }
-
-  // Easter
-  const easter = easterDate(y);
-  if (m===easter.getMonth() && d===easter.getDate()) return "Easter";
-
-  // Super Bowl Sunday
-  const sb = superBowlSunday(y);
-  if (m===sb.getMonth() && d===sb.getDate()) return "Super Bowl Sunday";
-
-  return null;
-}
-
-function isHoliday(dateObj) {
-  return getHolidayName(dateObj) !== null;
-}
-
-function dateKey(y, m, d) {
-  return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-}
-
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // UTILITIES
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════
 function fmtTime(raw) {
   if (!raw) return '';
-  const s = String(raw).padStart(4,'0');
-  return `${s.slice(0,2)}:${s.slice(2)}`;
+  const s = String(raw).replace('/','').padStart(4,'0');
+  return s.slice(0,2) + ':' + s.slice(2);
 }
-
 function fmtCredit(raw) {
-  // "1822" → "18h22"
   if (!raw) return '';
   const s = String(raw).padStart(4,'0');
-  return `${parseInt(s.slice(0,2))}h${s.slice(2)}`;
+  return parseInt(s.slice(0,2)) + 'h' + s.slice(2);
 }
-
-function minutesToHHMM(mins) {
-  return `${Math.floor(mins/60)}h${String(mins%60).padStart(2,'0')}`;
-}
-
-function tcrdToMinutes(raw) {
+function tcrdMins(raw) {
   if (!raw) return 0;
   const s = String(raw).padStart(4,'0');
   return parseInt(s.slice(0,2))*60 + parseInt(s.slice(2));
 }
+function minsToHHMM(m) {
+  return Math.floor(m/60) + 'h' + String(m%60).padStart(2,'0');
+}
+function dkey(y,m,d) {
+  return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+}
 
-// ═══════════════════════════════════════
-// PARSER
-// ═══════════════════════════════════════
-function deinterleaveColumns(text) {
-  // Sabre prints in TWO side-by-side columns. When copied, both columns
-  // appear on the same line separated by large whitespace.
-  // Fix: split each line at the column midpoint, collect left lines first
-  // then right lines — giving a clean single-column stream.
+// ═══════════════════════════════════════════════════
+// HOLIDAY DETECTION (ported from your Python)
+// ═══════════════════════════════════════════════════
+function easterDate(y) {
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4;
+  const f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3);
+  const h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4;
+  const l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  return new Date(y,Math.floor((h+l-7*m+114)/31)-1,((h+l-7*m+114)%31)+1);
+}
+function superBowl(y) {
+  let d=new Date(y,1,1);
+  while(d.getDay()!==0) d=new Date(d.getTime()+86400000);
+  return new Date(d.getTime()+7*86400000);
+}
+function holidayName(dt) {
+  const y=dt.getFullYear(),m=dt.getMonth(),d=dt.getDate(),dow=dt.getDay();
+  if(m===0&&d===1) return "New Year's Day";
+  if(m===6&&d===4) return "Independence Day";
+  if(m===11&&d===25) return "Christmas Day";
+  if(m===4&&dow===1){const nx=new Date(y,4,d+7);if(nx.getMonth()!==4)return "Memorial Day";}
+  if(m===8&&dow===1&&d<=7) return "Labor Day";
+  if(m===10&&dow===4){const ths=[];for(let x=1;x<=30;x++)if(new Date(y,10,x).getDay()===4)ths.push(x);if(d===ths[3])return "Thanksgiving";}
+  const ea=easterDate(y);if(m===ea.getMonth()&&d===ea.getDate())return "Easter";
+  const sb=superBowl(y);if(m===sb.getMonth()&&d===sb.getDate())return "Super Bowl Sunday";
+  return null;
+}
+
+// ═══════════════════════════════════════════════════
+// STEP 1: DE-INTERLEAVE TWO-COLUMN SABRE LAYOUT
+// Sabre prints days in two side-by-side columns.
+// When copied, both columns land on the same line.
+// We detect the column split point, separate them,
+// then output: all left-column lines, then all right-column lines.
+// ═══════════════════════════════════════════════════
+function deinterleave(text) {
   const rawLines = text.split('\n');
   const DATE_PAT = /\d{2}\s+(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/i;
 
-  // Detect split column by finding where date tokens appear in right half
-  let splitCol = 44;
-  const rightPositions = [];
+  // Find where right-column date tokens start
+  const rightPos = [];
   for (const line of rawLines) {
     if (line.length < 50) continue;
-    const rightHalf = line.slice(40);
-    const m = rightHalf.match(DATE_PAT);
-    if (m) rightPositions.push(40 + m.index);
-  }
-  if (rightPositions.length > 0) {
-    splitCol = Math.max(38, Math.min(...rightPositions) - 2);
+    const m = line.slice(40).match(DATE_PAT);
+    if (m) rightPos.push(40 + m.index);
   }
 
-  const leftLines = [], rightLines = [];
+  // If no right-column dates found, text is already single-column
+  if (rightPos.length === 0) return text;
+
+  const splitCol = Math.max(38, Math.min(...rightPos) - 2);
+  const left = [], right = [];
+
   for (const line of rawLines) {
-    const left  = line.slice(0, splitCol).trimEnd();
-    const right = line.slice(splitCol).trimEnd();
-    if (left.trim())  leftLines.push(left.trim());
-    if (right.trim()) rightLines.push(right.trim());
+    const l = line.slice(0, splitCol).trimEnd();
+    const r = line.slice(splitCol).trimEnd();
+    if (l.trim()) left.push(l.trim());
+    if (r.trim()) right.push(r.trim());
   }
 
-  return [...leftLines, ...rightLines].join('\n');
+  return [...left, ...right].join('\n');
 }
 
-function parseSchedule(text) {
-  // De-interleave the two-column Sabre layout before parsing
-  const cleaned = deinterleaveColumns(text);
-  const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+// ═══════════════════════════════════════════════════
+// STEP 2: PARSE SCHEDULE TEXT
+// ═══════════════════════════════════════════════════
+function parseSchedule(rawText) {
+  const text = deinterleave(rawText);
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
 
-  // ── Header info ──
-  let empNum='', firstName='', lastName='', base='', position='', line24='';
-  let bidMonthIdx=-1, bidYear=2026;
+  // ── Metadata ──
+  let empNum='', firstName='', lastName='', base='', position='';
+  let bidMonthIdx=-1, bidYear=-1;
 
-  // "625778 SCHULZ,ZACHARY JOHN SEN# 02550 BID EWR EM7 FO"
   for (const ln of lines) {
-    const hm = ln.match(/^(\d{5,6})\s+([A-Z]+),([A-Z][A-Z\s]+?)\s+SEN#.*BID\s+([A-Z]{3})\s+(\S+)\s+(FO|CA|FA)/i);
-    if (hm) {
-      empNum=hm[1]; lastName=hm[2]; firstName=hm[3].trim();
-      base=hm[4]; position=hm[6];
-    }
-    // "PERIOD 0326"
+    // Header: "625778 SCHULZ,ZACHARY JOHN SEN# 02550 BID EWR EM7 FO"
+    const hm = ln.match(/^(\d{5,6})\s+([A-Z]+),([A-Z][A-Z\s]+?)\s+SEN#.*BID\s+([A-Z]{3})\s+\S+\s+(FO|CA|FA)/i);
+    if (hm) { empNum=hm[1]; lastName=hm[2]; firstName=hm[3].trim(); base=hm[4]; position=hm[5]; }
+    // Period: "PERIOD 0326"
     const pm = ln.match(/PERIOD\s+(\d{2})(\d{2})/i);
     if (pm) { bidMonthIdx=parseInt(pm[1])-1; bidYear=2000+parseInt(pm[2]); }
-
-    // Line number "Line: 24" (from grid view sometimes included)
-    const lm = ln.match(/Line[:\s]+(\d+)/i);
-    if (lm) line24 = lm[1];
   }
 
-  // Fallback: infer month from first date found
+  // Fallback month: most frequent month in date lines
   if (bidMonthIdx < 0) {
+    const counts = {};
     for (const ln of lines) {
-      const dm = ln.match(/^\d{2}\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/i);
-      if (dm) { bidMonthIdx = MONTH_MAP[dm[1].toUpperCase()]; break; }
+      const m = ln.match(/\b\d{2}\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/i);
+      if (m) { const mo=MONTH_MAP[m[1].toUpperCase()]; counts[mo]=(counts[mo]||0)+1; }
     }
+    if (Object.keys(counts).length > 0)
+      bidMonthIdx = parseInt(Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0]);
   }
-  if (bidMonthIdx < 0) throw new Error("Could not detect bid month. Make sure this is a Sabre Schedule Detail Report.");
+  // Fallback year: use actual current year
+  if (bidYear < 0) {
+    bidYear = new Date().getFullYear();
+    // If bid month is more than 2 months ahead of now, it's likely last year
+    const nowMo = new Date().getMonth();
+    if (bidMonthIdx > nowMo + 2) bidYear--;
+  }
+  if (bidMonthIdx < 0) throw new Error("Could not detect bid month. Paste the full Schedule Detail Report text.");
 
   const daysInMonth = new Date(bidYear, bidMonthIdx+1, 0).getDate();
-  const firstDOW = new Date(bidYear, bidMonthIdx, 1).getDay();
+  const firstDOW    = new Date(bidYear, bidMonthIdx, 1).getDay();
 
-  // ── Group lines by date ──
-  const dayBlocks = {}; // "YYYY-MM-DD" → [lines...]
+  // ── Group lines by date into blocks ──
+  const dayBlocks = {}; // "YYYY-MM-DD" → [lines]
   let curKey = null;
 
   for (const ln of lines) {
-    const dm = ln.match(/^(\d{2})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+(.*)/i);
+    const dm = ln.match(/^(\d{2})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*(.*)/i);
     if (dm) {
       const dd = parseInt(dm[1]);
       const mo = MONTH_MAP[dm[2].toUpperCase()];
-      // determine year: if month < bid month it's prev year bleed, if > it's next year
+      // Year for this date entry
       let yr = bidYear;
-      if (mo < bidMonthIdx && bidMonthIdx - mo > 6) yr = bidYear + 1;
-      else if (mo > bidMonthIdx && mo - bidMonthIdx > 6) yr = bidYear - 1;
-      curKey = dateKey(yr, mo, dd);
+      if (mo !== bidMonthIdx) {
+        if (mo < bidMonthIdx) yr = (bidMonthIdx - mo > 6) ? bidYear+1 : bidYear;
+        else yr = (mo - bidMonthIdx > 6) ? bidYear-1 : bidYear;
+      }
+      curKey = dkey(yr, mo, dd);
       if (!dayBlocks[curKey]) dayBlocks[curKey] = [];
       dayBlocks[curKey].push(dm[3].trim());
     } else if (curKey) {
@@ -544,56 +375,52 @@ function parseSchedule(text) {
   for (const [key, block] of Object.entries(dayBlocks)) {
     const first = block[0] || '';
 
+    // OFF day
     if (/^OFF$/i.test(first)) {
       calDays[key] = { type:'off' };
       continue;
     }
 
-    // Pairing line: "R7373 /0309 POS FO DAY 01 REPORT 1614"
-    // pairingId includes /MMDD suffix to distinguish R7390/0312 from R7390/0319
+    // Pairing: "R7373 /0309 POS FO DAY 01 REPORT 1614"
+    // pairingId = "R7373/0309" — unique per trip instance (same code can repeat in a month)
     const pm = first.match(/^(R\d+)\s+\/(\d+)\s+POS\s+\S+\s+DAY\s+(\d+)\s+REPORT\s+(\d+)/i);
     if (pm) {
-      const pairingCode = pm[1].toUpperCase();
-      const pairingId   = pairingCode + '/' + pm[2];
-      const dayNum      = parseInt(pm[3]);
-      const report      = pm[4];
+      const pCode = pm[1].toUpperCase();
+      const pId   = pCode + '/' + pm[2];
+      const dayN  = parseInt(pm[3]);
+      const rpt   = pm[4];
 
       const legs=[], hotels=[];
-      let blkt='', tcrd='', tdty='', lyovTime='', lyovCity='', dendTime='', endsNext=false;
+      let blkt='', tcrd='', tdty='', dendTime='', lyovCity='', lyovTime='', endsNext=false;
 
       for (let i=1; i<block.length; i++) {
         const bl = block[i];
-
         // Flight leg: "3654 EWR SAV 1100 1330"
         const lm = bl.match(/^(\d{3,4})\s+([A-Z]{3})\s+([A-Z]{3})\s+(\d{4})\s+(\d{4})/);
         if (lm) { legs.push({flt:lm[1],from:lm[2],to:lm[3],dep:lm[4],arr:lm[5]}); continue; }
-
-        // D-END: "D-END 2154    BLKT 0638 TCRD 0638" or "D-END 0006/10 BLKT 0621 TCRD 0621"
-        const dem = bl.match(/D-END\s+([\d\/]+)\s+BLKT\s+(\d+)\s+TCRD\s+(\d+)/i);
-        if (dem) { dendTime=dem[1].split('/')[0]; blkt=dem[2]; tcrd=dem[3]; continue; }
-
+        // D-END: captures actual release clock time (before /nextday suffix)
+        const dem = bl.match(/D-END\s+([\d]+)(?:\/\d+)?\s+BLKT\s+(\d+)\s+TCRD\s+(\d+)/i);
+        if (dem) { dendTime=dem[1]; blkt=dem[2]; tcrd=dem[3]; continue; }
         // TDTY: "TDTY  0852 LYOV  1650 STL"
         const tm = bl.match(/TDTY\s+(\d+)(?:\s+LYOV\s+(\d+)\s+([A-Z]{3}))?/i);
         if (tm) { tdty=tm[1]; if(tm[2]){lyovTime=tm[2]; lyovCity=tm[3];} continue; }
-
-        // Hotel with (xxx)xxx-xxxx
+        // Hotel (xxx)xxx-xxxx
         const hm = bl.match(/^(.+?)\s{2,}(\(\d{3}\)\d{3}-\d{4})/);
-        if (hm) { hotels.push({name:hm[1].trim(), phone:hm[2]}); continue; }
-        // Hotel with 1 xxx-xxx-xxxx
+        if (hm) { hotels.push({name:hm[1].trim(),phone:hm[2]}); continue; }
+        // Hotel 1 xxx-xxx-xxxx
         const hm2 = bl.match(/^(.+?)\s{2,}(1\s+\d{3}-\d{3}-\d{4})/);
-        if (hm2) { hotels.push({name:hm2[1].trim(), phone:hm2[2]}); continue; }
-
+        if (hm2) { hotels.push({name:hm2[1].trim(),phone:hm2[2]}); continue; }
+        // Hotel xxx-xxx-xxxx (no parens, e.g. "757-622-6664")
+        const hm3 = bl.match(/^(.{8,}?)\s{2,}(\d{3}-\d{3}-\d{4})/);
+        if (hm3) { hotels.push({name:hm3[1].trim(),phone:hm3[2]}); continue; }
         if (/PAIRING ENDS IN NEXT BID PERIOD/i.test(bl)) endsNext=true;
       }
 
       calDays[key] = {
-        type: dayNum===1 ? 'pstart' : 'pcont',
-        pairing: pairingCode,
-        pairingId,
-        dayNum, report,
+        type: dayN===1 ? 'pstart' : 'pcont',
+        pCode, pId, dayN, rpt,
         legs, blkt, tcrd, tdty, dendTime,
-        lyovTime, lyovCity, hotels, endsNext,
-        hasLayover: !!lyovCity,
+        lyovCity, lyovTime, hotels, endsNext,
         isFinal: !lyovCity && tcrd!==''
       };
       continue;
@@ -602,336 +429,277 @@ function parseSchedule(text) {
     calDays[key] = { type:'off' };
   }
 
-  // ── Second pass: link pairings, mark final days ──
-  const pairingGroups = {}; // pairingId → [keys]
-  for (const [key, day] of Object.entries(calDays)) {
-    if (!day.pairingId) continue;
-    if (!pairingGroups[day.pairingId]) pairingGroups[day.pairingId]=[];
-    pairingGroups[day.pairingId].push(key);
+  // ── Link pairings: sum credit, mark final day ──
+  // Group by pId
+  const pGroups = {}; // pId → [keys sorted]
+  for (const [k,d] of Object.entries(calDays)) {
+    if (!d.pId) continue;
+    if (!pGroups[d.pId]) pGroups[d.pId]=[];
+    pGroups[d.pId].push(k);
   }
-  for (const [code, keys] of Object.entries(pairingGroups)) {
+  // Sort pIds by their first occurrence date so color assignment is chronological
+  const sortedPids = Object.keys(pGroups).sort((a,b)=>{
+    const ka=pGroups[a].slice().sort()[0]||'';
+    const kb=pGroups[b].slice().sort()[0]||'';
+    return ka.localeCompare(kb);
+  });
+  // Assign alternating color index: 0=gold, 1=blue (skip prior-bid-only pairings)
+  let colorCounter = 0;
+  for (const pid of sortedPids) {
+    const keys = pGroups[pid];
     keys.sort();
-    const lastKey = keys[keys.length-1];
-    if (calDays[lastKey]) calDays[lastKey].isFinal = true;
-    // Sum TCRD across ALL days of this pairing for the true total credit
-    let totalMins = 0;
-    keys.forEach(k => { if(calDays[k]?.tcrd) totalMins += tcrdToMinutes(calDays[k].tcrd); });
-    const totalH = Math.floor(totalMins/60);
-    const totalM = String(totalMins%60).padStart(2,'0');
-    const totalCreditStr = String(totalH).padStart(2,'0') + totalM;
-    const endsNext = keys.some(k => calDays[k]?.endsNext);
-    keys.forEach(k => {
-      if(calDays[k]) {
-        calDays[k].totalCredit = totalCreditStr;
-        calDays[k].creditPartial = endsNext; // flag: next-period day credit not included
-      }
+    // Mark final day
+    calDays[keys[keys.length-1]].isFinal = true;
+    // Sum all days' TCRD for total trip credit
+    let totMins = 0;
+    for (const k of keys) if (calDays[k].tcrd) totMins += tcrdMins(calDays[k].tcrd);
+    const totH = String(Math.floor(totMins/60)).padStart(2,'0');
+    const totM = String(totMins%60).padStart(2,'0');
+    const totStr = totH + totM; // e.g. "1822"
+    const partial = keys.some(k => calDays[k].endsNext);
+    // Only count color for pairings that have at least one non-prior-bid day
+    const hasActiveDays = keys.some(k => {
+      const mo = parseInt(k.split('-')[1])-1;
+      return mo === bidMonthIdx || keys[0].split('-')[1]-1 === bidMonthIdx;
     });
+    const colorIdx = colorCounter % 2; // 0=gold, 1=blue
+    if (hasActiveDays) colorCounter++;
+    for (const k of keys) {
+      calDays[k].totalCredit = totStr;
+      calDays[k].creditPartial = partial;
+      calDays[k].colorIdx = colorIdx;
+    }
   }
 
-  // ── Mark prior bid vs this bid ──
-  // A day is "prior bid" if its pairing STARTED in a different (prior) month
+  // ── Mark prior bid: pairing that started in a prior calendar month ──
   for (const [key, day] of Object.entries(calDays)) {
-    if (!day.pairingId) continue;
-    const keys = pairingGroups[day.pairingId] || [];
+    if (!day.pId) continue;
+    const keys = pGroups[day.pId] || [];
+    if (!keys.length) continue;
     keys.sort();
-    if (keys.length === 0) continue;
-    const firstKey = keys[0];
-    const firstMo  = parseInt(firstKey.split('-')[1]) - 1;
-    const thisMo   = parseInt(key.split('-')[1]) - 1;
-    const thisYr   = parseInt(key.split('-')[0]);
-    // if the pairing's first day is in a prior month → prior bid bleed
-    if (firstMo !== bidMonthIdx && thisYr === bidYear && thisMo === bidMonthIdx) {
+    const firstMo = parseInt(keys[0].split('-')[1]) - 1;
+    const thisMo  = parseInt(key.split('-')[1]) - 1;
+    // If pairing's first day is NOT in the bid month, and THIS day IS in the bid month → prior bid
+    if (firstMo !== bidMonthIdx && thisMo === bidMonthIdx) {
       day.priorBid = true;
     }
   }
 
   // ── Holiday detection ──
-  // Scan every day that has a pairing (and is not prior bid) for holidays
-  const workedHolidays = [];
-  const allDateKeys = [];
-  // generate all dates for this bid month
+  const holDays = {};
+  const workedHols = [];
   for (let d=1; d<=daysInMonth; d++) {
-    allDateKeys.push(dateKey(bidYear, bidMonthIdx, d));
+    const k = dkey(bidYear, bidMonthIdx, d);
+    const dt = new Date(bidYear, bidMonthIdx, d);
+    const name = holidayName(dt);
+    if (name) holDays[k] = name;
   }
-  // also next month bleed days
-  for (const [key, day] of Object.entries(calDays)) {
-    if (!allDateKeys.includes(key)) allDateKeys.push(key);
+  // Also check bleed days
+  for (const k of Object.keys(calDays)) {
+    if (holDays[k]) continue;
+    const [y,m,d] = k.split('-').map(Number);
+    const name = holidayName(new Date(y,m-1,d));
+    if (name) holDays[k] = name;
   }
-
-  const holidayDays = {}; // key → holidayName
-  for (const key of allDateKeys) {
-    const [yr, mo, dd] = key.split('-').map(Number);
-    const dateObj = new Date(yr, mo-1, dd);
-    const name = getHolidayName(dateObj);
-    if (name) holidayDays[key] = name;
-  }
-
-  for (const [key, name] of Object.entries(holidayDays)) {
-    const day = calDays[key];
-    if (day && day.pairing && !day.priorBid) {
-      workedHolidays.push({ key, name, date: key });
-      if (calDays[key]) calDays[key].isHoliday = true;
+  for (const [k, name] of Object.entries(holDays)) {
+    const day = calDays[k];
+    if (day && day.pCode && !day.priorBid) {
+      day.isHoliday = true;
+      workedHols.push({key:k, name});
     }
   }
 
-  // ── Credit totals (ported from Flask) ──
-  // Base TCRD: sum all TCRD values from non-prior-bid pairing days
-  let baseMinutes = 0;
-  const seenTcrd = new Set(); // avoid double-counting per pairing
-  for (const [key, day] of Object.entries(calDays)) {
-    if (!day.pairing || day.priorBid) continue;
-    if (day.tcrd && !seenTcrd.has(day.pairing + day.tcrd + key)) {
-      seenTcrd.add(day.pairing + day.tcrd + key);
-      baseMinutes += tcrdToMinutes(day.tcrd);
-    }
+  // ── Base credit total ──
+  let baseMins = 0;
+  const seen = new Set();
+  for (const [k, day] of Object.entries(calDays)) {
+    if (!day.pCode || day.priorBid || !day.tcrd) continue;
+    const uid = day.pId + ':' + k;
+    if (!seen.has(uid)) { seen.add(uid); baseMins += tcrdMins(day.tcrd); }
   }
-  const holidayMinutes = workedHolidays.length * HOLIDAY_BONUS_MIN;
-  const totalMinutes   = baseMinutes + holidayMinutes;
+  const holMins   = workedHols.length * HOLIDAY_BONUS_MIN;
+  const totalMins = baseMins + holMins;
 
   return {
-    empNum, firstName, lastName, base, position, line24,
+    empNum, firstName, lastName, base, position,
     bidMonthIdx, bidYear,
     monthName: MONTH_NAMES[bidMonthIdx],
     daysInMonth, firstDOW,
-    calDays, pairingGroups, holidayDays,
-    workedHolidays, holidayDays,
-    baseMinutes, holidayMinutes, totalMinutes
+    calDays, pGroups, holDays,
+    workedHols, baseMins, holMins, totalMins
   };
 }
 
-// ═══════════════════════════════════════
-// RENDERER
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// STEP 3: RENDER
+// ═══════════════════════════════════════════════════
 function renderCalendar(data) {
-  const {
-    empNum, firstName, lastName, base, position, line24,
-    bidMonthIdx, bidYear, monthName, daysInMonth, firstDOW,
-    calDays, pairingGroups, holidayDays,
-    workedHolidays, baseMinutes, holidayMinutes, totalMinutes
-  } = data;
+  const {empNum,firstName,lastName,base,position,
+         bidMonthIdx,bidYear,monthName,daysInMonth,firstDOW,
+         calDays,pGroups,holDays,workedHols,baseMins,holMins,totalMins} = data;
 
-  // ── Count pairings that belong to this bid ──
-  const bidPairings = new Set();
-  for (const [key, day] of Object.entries(calDays)) {
-    if (day.pairingId && !day.priorBid) bidPairings.add(day.pairingId);
-  }
+  // Unique bid pairings (not prior bid)
+  const bidPairs = new Set();
+  for (const [k,d] of Object.entries(calDays))
+    if (d.pId && !d.priorBid) bidPairs.add(d.pId);
 
-  const nameStr = firstName && lastName ? `${firstName} ${lastName}` : (lastName || empNum);
-  const subParts = [empNum, nameStr, base, position];
-  if (line24) subParts.push(`Line ${line24}`);
-
-  // ── Build cell HTML ──
-  function buildTooltip(day, dayNum, mo, yr) {
-    if (!day || !day.pairing) return '';
-    const legHTML = (day.legs||[]).map(l =>
-      `<div class="tt-leg">
-        <span class="tt-fnum">${l.flt}</span>
-        <span class="tt-from">${l.from}</span>
-        <span class="tt-arrow">›</span>
-        <span class="tt-to">${l.to}</span>
-        <span class="tt-dep">${fmtTime(l.dep)}</span>
-        <span class="tt-arr">${fmtTime(l.arr)}</span>
-      </div>`
+  // ── Tooltip ──
+  function mkTooltip(day, key) {
+    if (!day.pCode) return '';
+    const holName = holDays[key];
+    const legHTML = day.legs.map(l =>
+      `<div class="tt-leg"><span class="tt-fnum">${l.flt}</span><span class="tt-from">${l.from}</span><span class="tt-arrow">›</span><span class="tt-to">${l.to}</span><span class="tt-dep">${fmtTime(l.dep)}</span><span class="tt-arr">${fmtTime(l.arr)}</span></div>`
     ).join('');
-
-    const statsHTML = [
-      day.report ? `<div class="tt-row"><span class="tt-lbl">Report</span><span class="tt-val g">${fmtTime(day.report)}</span></div>` : '',
-      day.blkt   ? `<div class="tt-row"><span class="tt-lbl">Block</span><span class="tt-val b">${fmtCredit(day.blkt)}</span></div>` : '',
-      day.tcrd   ? `<div class="tt-row"><span class="tt-lbl">Trip Credit</span><span class="tt-val gr">${fmtCredit(day.tcrd)}</span></div>` : '',
-      day.tdty   ? `<div class="tt-row"><span class="tt-lbl">Duty</span><span class="tt-val">${fmtCredit(day.tdty)}</span></div>` : '',
+    const stats = [
+      day.rpt      ? `<div class="tt-row"><span class="tt-lbl">Report</span><span class="tt-val g">${fmtTime(day.rpt)}</span></div>` : '',
+      day.blkt     ? `<div class="tt-row"><span class="tt-lbl">Block</span><span class="tt-val b">${fmtCredit(day.blkt)}</span></div>` : '',
+      day.tcrd     ? `<div class="tt-row"><span class="tt-lbl">Trip Credit</span><span class="tt-val gr">${fmtCredit(day.tcrd)}</span></div>` : '',
+      day.tdty     ? `<div class="tt-row"><span class="tt-lbl">Duty</span><span class="tt-val">${fmtCredit(day.tdty)}</span></div>` : '',
       day.lyovCity ? `<div class="tt-row"><span class="tt-lbl">Layover</span><span class="tt-val b">${day.lyovCity} (${fmtCredit(day.lyovTime)})</span></div>` : '',
     ].filter(Boolean).join('');
-
-    const hotelHTML = (day.hotels||[]).map(h =>
+    const hotelHTML = day.hotels.map(h =>
       `<div class="tt-hotel"><div class="tt-hotel-name">🏨 ${h.name}</div>${h.phone?`<div class="tt-hotel-ph">${h.phone}</div>`:''}</div>`
     ).join('');
-
-    const key = dateKey(yr, mo, dayNum);
-    const holName = holidayDays[key];
     const holHTML = holName
-      ? `<div class="tt-holiday">★ Holiday: ${holName}${day.isHoliday?' (+ bonus credit)':''}</div>`
-      : '';
-
+      ? `<div class="tt-hol">★ ${holName}${day.isHoliday?' — holiday pay applies':''}</div>` : '';
     return `<div class="tt">
       <div class="tt-head">
-        <div><div class="tt-code">${day.pairing}</div></div>
-        <div class="tt-meta">Day ${day.dayNum}${day.priorBid?' · Prior Bid':''}</div>
+        <div class="tt-code">${day.pCode}</div>
+        <div class="tt-meta">Day ${day.dayN}${day.priorBid?' · Prior Bid':''}</div>
       </div>
-      ${legHTML ? `<div class="tt-legs">${legHTML}</div><hr class="tt-div">` : ''}
-      ${statsHTML}
-      ${hotelHTML}
-      ${holHTML}
+      ${legHTML?`<div class="tt-legs">${legHTML}</div><hr class="tt-div">`:''}
+      ${stats}${hotelHTML}${holHTML}
     </div>`;
   }
 
-  function renderCell(dayNum, mo, yr, isNextMoLabel=false) {
-    const key = dateKey(yr, mo, dayNum);
+  // ── Single cell ──
+  function cell(dayNum, mo, yr, nextMoLabel=false) {
+    const key = dkey(yr, mo, dayNum);
     const day = calDays[key];
-    const dateObj = new Date(yr, mo, dayNum);
-    const holName = holidayDays[key];
-    const dayLabel = isNextMoLabel
+    const holName = holDays[key];
+    const label = nextMoLabel
       ? `<div class="dn" style="font-size:10px;">${MONTH_SHORT[mo]} ${dayNum}</div>`
       : `<div class="dn">${String(dayNum).padStart(2,'0')}</div>`;
 
     if (!day || day.type==='off') {
-      const holCls = holName ? ' holiday-off' : '';
-      const holLbl = holName ? `<div class="holiday-lbl">${holName}</div>` : '';
-      return `<div class="dc off${holCls}">${dayLabel}<div class="off-lbl">OFF</div>${holLbl}</div>`;
+      return `<div class="dc off">${label}<div class="off-lbl">OFF</div>${holName?`<div class="hol-lbl">${holName}</div>`:''}</div>`;
     }
-
     if (day.priorBid) {
-      const tt = buildTooltip(day, dayNum, mo, yr);
-      return `<div class="dc prior">
-        ${dayLabel}
-        <div class="prior-stamp">PRIOR BID</div>
-        <div class="pcode prior-c">${day.pairing}</div>
-        ${day.isFinal ? `<div class="trow"><span class="tv rel-prior">REL ${fmtTime(day.dendTime || day.tdty)}</span></div>` : ''}
-        ${tt}
-      </div>`;
+      return `<div class="dc prior">${label}<div class="prior-stamp">PRIOR BID</div><div class="pcode prior-c">${day.pCode}</div>${day.isFinal?`<div class="trow"><span class="tv rel-p">REL ${fmtTime(day.dendTime)}</span></div>`:''}</div>`;
     }
 
     const isPstart = day.type==='pstart';
-    const cls = isPstart ? 'pstart' : 'pcont';
-    const holCls = day.isHoliday ? ' holiday-worked' : '';
-    const pcCls = isPstart ? '' : 'cont';
-
+    const isBlue  = day.colorIdx === 1;
+    const holCls  = day.isHoliday ? ' hol-worked' : '';
+    // Cell class: gold pair = pstart/pcont, blue pair = p2start/p2cont
+    const cellCls = isBlue
+      ? (isPstart ? 'p2start' : 'p2cont')
+      : (isPstart ? 'pstart'  : 'pcont');
+    const rptCls  = isBlue ? 'tv rpt2' : 'tv rpt';
+    const relCls  = isBlue ? 'tv rel2' : 'tv rel';
+    const pcodeCls = isBlue
+      ? (isPstart ? 'p2'     : 'p2cont')
+      : (isPstart ? ''       : 'cont');
     const timeRow = isPstart
-      ? `<div class="trow"><span class="tv rpt">RPT ${fmtTime(day.report)}</span></div>`
-      : (day.isFinal ? `<div class="trow"><span class="tv rel">REL ${fmtTime(day.dendTime || day.tdty)}</span></div>` : '');
+      ? `<div class="trow"><span class="${rptCls}">RPT ${fmtTime(day.rpt)}</span></div>`
+      : (day.isFinal ? `<div class="trow"><span class="${relCls}">REL ${fmtTime(day.dendTime)}</span></div>` : '');
+    const badgeCls = isBlue ? 'lbadge b' : 'lbadge';
+    const badge  = day.lyovCity ? `<div class="${badgeCls}">${day.lyovCity}</div>` : '';
+    const credLbl = day.creditPartial ? `~${fmtCredit(day.totalCredit)}*` : fmtCredit(day.totalCredit);
+    const cred   = day.isFinal && day.totalCredit ? `<div class="cred">${credLbl} credit</div>` : '';
+    const tt     = mkTooltip(day, key);
 
-    const badge  = day.lyovCity ? `<div class="lbadge">${day.lyovCity}</div>` : '';
-    const creditLabel = day.creditPartial ? `~${fmtCredit(day.totalCredit)}` : `${fmtCredit(day.totalCredit)}`;
-    const credit = day.isFinal && day.totalCredit ? `<div class="cred">${creditLabel} credit${day.creditPartial ? '*' : ''}</div>` : '';
-    const tt     = buildTooltip(day, dayNum, mo, yr);
-
-    return `<div class="dc ${cls}${holCls}">
-      ${dayLabel}
-      <div class="pcode ${pcCls}">${day.pairing}</div>
-      ${timeRow}
-      ${badge}
-      ${credit}
-      ${tt}
+    return `<div class="dc ${cellCls}${holCls}">
+      ${label}
+      <div class="pcode ${pcodeCls}">${day.pCode}</div>
+      ${timeRow}${badge}${cred}${tt}
     </div>`;
   }
 
-  // ── Assemble grid ──
+  // ── Build grid ──
   let cells = '';
+  for (let i=0;i<firstDOW;i++) cells += `<div class="dc empty"></div>`;
+  for (let d=1;d<=daysInMonth;d++) cells += cell(d, bidMonthIdx, bidYear);
 
-  // Empty leading cells
-  for (let i=0; i<firstDOW; i++) cells += `<div class="dc empty"></div>`;
-
-  // This month's days
-  for (let d=1; d<=daysInMonth; d++) {
-    cells += renderCell(d, bidMonthIdx, bidYear);
+  // Next-month bleed days that belong to THIS bid
+  const nxtMo = (bidMonthIdx+1)%12;
+  const nxtYr = nxtMo===0 ? bidYear+1 : bidYear;
+  for (let d=1;d<=7;d++) {
+    const k = dkey(nxtYr, nxtMo, d);
+    const day = calDays[k];
+    if (day && day.pCode && !day.priorBid) cells += cell(d, nxtMo, nxtYr, true);
+    else break;
   }
-
-  // Next-month bleed days that belong to this bid
-  const nextMo = (bidMonthIdx+1)%12;
-  const nextYr = nextMo===0 ? bidYear+1 : bidYear;
-  for (let d=1; d<=7; d++) {
-    const key = dateKey(nextYr, nextMo, d);
-    const day = calDays[key];
-    if (day && day.pairing && !day.priorBid) {
-      cells += renderCell(d, nextMo, nextYr, true);
-    } else break;
-  }
-
-  // Fill trailing cells
-  const cellCount = (cells.match(/class="dc/g)||[]).length;
-  const rem = cellCount % 7;
-  if (rem > 0) for (let i=0; i<7-rem; i++) cells += `<div class="dc empty"></div>`;
+  // Pad last row
+  const total = (cells.match(/class="dc/g)||[]).length;
+  const rem = total%7;
+  if (rem>0) for (let i=0;i<7-rem;i++) cells += `<div class="dc empty"></div>`;
 
   // ── Pairing cards ──
-  const seenCards = new Set();
-  let pCardHTML = '';
-  // Sort pairings by their first date
-  const sortedPairings = [...bidPairings].sort((a,b) => {
-    const ka = (pairingGroups[a]||[]).sort()[0]||'';
-    const kb = (pairingGroups[b]||[]).sort()[0]||'';
+  const sortedPairs = [...bidPairs].sort((a,b)=>{
+    const ka=(pGroups[a]||[]).filter(k=>!calDays[k]?.priorBid).sort()[0]||'';
+    const kb=(pGroups[b]||[]).filter(k=>!calDays[k]?.priorBid).sort()[0]||'';
     return ka.localeCompare(kb);
   });
 
-  for (const code of sortedPairings) {
-    if (seenCards.has(code)) continue;
-    seenCards.add(code);
-    const keys = (pairingGroups[code]||[]).filter(k => !calDays[k]?.priorBid).sort();
-    const displayCode = calDays[keys[0]]?.pairing || code.split('/')[0];
+  let pCardHTML = '';
+  for (const pid of sortedPairs) {
+    const keys = (pGroups[pid]||[]).filter(k=>!calDays[k]?.priorBid).sort();
     if (!keys.length) continue;
-
-    const firstKey = keys[0], lastKey = keys[keys.length-1];
-    const [fy,fm,fd] = firstKey.split('-').map(Number);
-    const [ly,lm,ld] = lastKey.split('-').map(Number);
-    const dateRange = (fm===lm)
-      ? `${MONTH_SHORT[fm-1]} ${fd} – ${ld}`
-      : `${MONTH_SHORT[fm-1]} ${fd} – ${MONTH_SHORT[lm-1]} ${ld}`;
-
-    // Collect all legs for route
-    const allLegs = [];
-    for (const k of keys) { const d=calDays[k]; if(d?.legs) allLegs.push(...d.legs); }
-    const routeApts = [];
-    for (const l of allLegs) {
-      if (!routeApts.length) routeApts.push(l.from);
-      routeApts.push(l.to);
-    }
-    // dedup consecutive
-    const uniq = routeApts.filter((a,i) => i===0 || a!==routeApts[i-1]);
-    const routeHTML = uniq.map((a,i) =>
-      i < uniq.length-1
-        ? `<span class="apt">${a}</span><span class="rt-arr">›</span>`
-        : `<span class="apt">${a}</span>`
-    ).join('');
-
-    const firstDay = calDays[firstKey], lastDay = calDays[lastKey];
-    const rpt    = fmtTime(firstDay?.report || '');
-    const rel    = fmtTime(lastDay?.dendTime || lastDay?.tdty || '');
-    const isPartial = firstDay?.creditPartial;
-    const creditRaw = fmtCredit(firstDay?.totalCredit || lastDay?.totalCredit || '');
-    const credit = isPartial ? `~${creditRaw}` : creditRaw;
-    const layovers = keys.map(k => calDays[k]?.lyovCity).filter(Boolean);
-    const hasHol = keys.some(k => calDays[k]?.isHoliday);
-
-    pCardHTML += `<div class="pcard">
-      <div class="pc-code">${displayCode}</div>
-      <div class="pc-dates">${dateRange} &nbsp;·&nbsp; ${keys.length}-day &nbsp;·&nbsp; ${position}</div>
+    const fk=keys[0], lk=keys[keys.length-1];
+    const fd=calDays[fk], ld=calDays[lk];
+    const [,fm,fdd] = fk.split('-').map(Number);
+    const [,lm,ldd] = lk.split('-').map(Number);
+    const dateRange = fm===lm
+      ? `${MONTH_SHORT[fm-1]} ${fdd} – ${ldd}`
+      : `${MONTH_SHORT[fm-1]} ${fdd} – ${MONTH_SHORT[lm-1]} ${ldd}`;
+    // Route from all legs
+    const allLegs = keys.flatMap(k=>calDays[k].legs||[]);
+    const apts = [];
+    for (const l of allLegs) { if(!apts.length) apts.push(l.from); apts.push(l.to); }
+    const uniq = apts.filter((a,i)=>i===0||a!==apts[i-1]);
+    const routeHTML = uniq.map((a,i)=>i<uniq.length-1?`<span class="apt">${a}</span><span class="rt-arr">›</span>`:`<span class="apt">${a}</span>`).join('');
+    const layovers = keys.map(k=>calDays[k].lyovCity).filter(Boolean);
+    const credit = fd.creditPartial ? `~${fmtCredit(fd.totalCredit)}` : fmtCredit(fd.totalCredit);
+    const hasHol = keys.some(k=>calDays[k].isHoliday);
+    const isBlueCard = (sortedPairs.indexOf(pid) % 2) === 1;
+    const pcardStyle = isBlueCard ? ' style="--pcolor:var(--accent2)"' : '';
+    pCardHTML += `<div class="pcard"${pcardStyle}>
+      <div class="pc-code">${fd.pCode}</div>
+      <div class="pc-dates">${dateRange} &nbsp;·&nbsp; ${keys.length}-day${position?' &nbsp;·&nbsp; '+position:''}</div>
       <div class="route">${routeHTML}</div>
       <div class="pstats">
-        <div class="ps"><div class="ps-l">RPT</div><div class="ps-v">${rpt}</div></div>
-        <div class="ps"><div class="ps-l">REL</div><div class="ps-v">${rel}</div></div>
+        <div class="ps"><div class="ps-l">RPT</div><div class="ps-v">${fmtTime(fd.rpt)}</div></div>
+        <div class="ps"><div class="ps-l">REL</div><div class="ps-v">${fmtTime(ld.dendTime)}</div></div>
         <div class="ps"><div class="ps-l">Credit</div><div class="ps-v">${credit}</div></div>
       </div>
       <div class="pills">
-        ${layovers.length ? `<span class="pill-lay">✈ ${layovers.join(' · ')}</span>` : ''}
-        ${credit ? `<span class="pill-cr">${credit}</span>` : ''}
-        ${hasHol ? `<span class="pill-hol">★ Holiday</span>` : ''}
+        ${layovers.length?`<span class="pill-lay">✈ ${layovers.join(' · ')}</span>`:''}
+        ${credit?`<span class="pill-cr">${credit}</span>`:''}
+        ${hasHol?`<span class="pill-hol">★ Holiday</span>`:''}
       </div>
     </div>`;
   }
 
   // ── Holiday section ──
-  let holSectionHTML = '';
-  if (workedHolidays.length > 0) {
-    const holCards = workedHolidays.map(h => {
-      const [yr, mo, dd] = h.key.split('-').map(Number);
-      const d = new Date(yr, mo-1, dd);
-      const dayStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-      return `<div class="hol-card">
-        <div class="hol-name">${h.name}</div>
-        <div class="hol-date">${dayStr}</div>
-        <div class="hol-bonus">+${minutesToHHMM(HOLIDAY_BONUS_MIN)} bonus</div>
-      </div>`;
+  let holSection = '';
+  if (workedHols.length) {
+    const cards = workedHols.map(h=>{
+      const [y,m,d]=h.key.split('-').map(Number);
+      const ds=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      return `<div class="hol-card"><div class="hol-name">${h.name}</div><div class="hol-date">${ds}</div><div class="hol-bonus">+${minsToHHMM(HOLIDAY_BONUS_MIN)} bonus</div></div>`;
     }).join('');
-    holSectionHTML = `<div class="holiday-section">
-      <h2>HOLIDAY PAY</h2>
-      <div class="hol-cards">${holCards}</div>
-    </div>`;
+    holSection = `<div class="hol-section"><h2>HOLIDAY PAY</h2><div class="hol-cards">${cards}</div></div>`;
   }
 
   // ── Stats ──
+  const nameStr = [firstName,lastName].filter(Boolean).join(' ') || empNum;
+  const subParts = [empNum,nameStr,base,position].filter(Boolean);
   const statsHTML = `
-    <div class="stat"><div class="stat-l">Pairings</div><div class="stat-v">${bidPairings.size}</div></div>
-    <div class="stat"><div class="stat-l">Trip Credit</div><div class="stat-v">${minutesToHHMM(baseMinutes)}</div></div>
-    ${holidayMinutes > 0 ? `<div class="stat"><div class="stat-l">Holiday Bonus</div><div class="stat-v holiday">+${minutesToHHMM(holidayMinutes)}</div></div>` : ''}
-    ${holidayMinutes > 0 ? `<div class="stat"><div class="stat-l">Total Credit</div><div class="stat-v">${minutesToHHMM(totalMinutes)}</div></div>` : ''}
+    <div class="stat"><div class="stat-l">Pairings</div><div class="stat-v">${bidPairs.size}</div></div>
+    <div class="stat"><div class="stat-l">Trip Credit</div><div class="stat-v">${minsToHHMM(baseMins)}</div></div>
+    ${holMins?`<div class="stat"><div class="stat-l">Holiday Bonus</div><div class="stat-v hol">+${minsToHHMM(holMins)}</div></div>`:''}
+    ${holMins?`<div class="stat"><div class="stat-l">Total Credit</div><div class="stat-v">${minsToHHMM(totalMins)}</div></div>`:''}
   `;
 
   return `
@@ -939,71 +707,53 @@ function renderCalendar(data) {
       <div>
         <div class="tag">Crew Schedule</div>
         <h1>${monthName.toUpperCase()} <span>${bidYear}</span></h1>
-        <div class="sub">${subParts.filter(Boolean).join(' &nbsp;·&nbsp; ')}</div>
+        <div class="sub">${subParts.join(' &nbsp;·&nbsp; ')}</div>
       </div>
       <div class="stats">${statsHTML}</div>
     </div>
-
     <div class="legend">
-      <div class="leg"><div class="leg-dot" style="background:var(--accent)"></div>Pairing Start</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--accent2)"></div>Continuation / Release</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--accent)"></div>Pairing (odd)</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--accent2)"></div>Pairing (even)</div>
       <div class="leg"><div class="leg-dot" style="background:#0e1016;border:1px solid #181c24"></div>Day Off</div>
       <div class="leg"><div class="leg-dot" style="background:#0c0e14;border:1px dashed #252a36"></div>Prior Bid</div>
-      ${workedHolidays.length ? `<div class="leg"><div class="leg-dot" style="background:var(--card);border:1px solid var(--border);font-size:7px;display:flex;align-items:center;justify-content:center;color:var(--green)">★</div>Holiday Worked</div>` : ''}
-      <div class="leg" style="opacity:0.5;font-size:10px;">Hover days for details</div>
+      ${workedHols.length?`<div class="leg"><div class="leg-dot" style="background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--green)">★</div>Holiday</div>`:''}
+      <div class="leg" style="opacity:.5;font-size:10px;">Hover days for details</div>
     </div>
-
     <div class="dow-row">
       <div class="dow">Sun</div><div class="dow">Mon</div><div class="dow">Tue</div>
       <div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div>
     </div>
-
     <div class="cal">${cells}</div>
-
-    <div class="summary">
-      <h2>PAIRINGS DETAIL</h2>
-      <div class="pcards">${pCardHTML}</div>
-    </div>
-
-    ${holSectionHTML}
+    <div class="summary"><h2>PAIRINGS DETAIL</h2><div class="pcards">${pCardHTML}</div></div>
+    ${holSection}
   `;
 }
 
-// ═══════════════════════════════════════
-// APP LOGIC
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════════
 function handleParse() {
   const text = document.getElementById('sched-input').value.trim();
-  const errEl = document.getElementById('error-msg');
-  errEl.classList.remove('show');
-
-  if (!text) {
-    errEl.textContent = 'Please paste your schedule text first.';
-    errEl.classList.add('show');
-    return;
-  }
-
+  const err  = document.getElementById('error-msg');
+  err.classList.remove('show');
+  if (!text) { err.textContent='Please paste your schedule text first.'; err.classList.add('show'); return; }
   try {
     const data = parseSchedule(text);
-    const html = renderCalendar(data);
-    document.getElementById('cal-output').innerHTML = html;
-    document.getElementById('paste-screen').style.display = 'none';
+    document.getElementById('cal-output').innerHTML = renderCalendar(data);
+    document.getElementById('paste-screen').style.display='none';
     document.getElementById('cal-screen').classList.add('show');
     window.scrollTo(0,0);
   } catch(e) {
-    errEl.textContent = 'Error: ' + (e.message || 'Could not parse schedule. Make sure this is a Sabre CrewTrac Schedule Detail Report.');
-    errEl.classList.add('show');
+    err.textContent = 'Error: ' + (e.message||'Could not parse. Paste the full Sabre Schedule Detail Report text.');
+    err.classList.add('show');
     console.error(e);
   }
 }
-
 function goBack() {
   document.getElementById('cal-screen').classList.remove('show');
-  document.getElementById('paste-screen').style.display = 'flex';
+  document.getElementById('paste-screen').style.display='flex';
   window.scrollTo(0,0);
 }
-
-// Allow Ctrl+Enter to submit
 document.getElementById('sched-input').addEventListener('keydown', e => {
   if (e.key==='Enter' && (e.ctrlKey||e.metaKey)) handleParse();
 });
