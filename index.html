@@ -448,8 +448,42 @@ function tcrdToMinutes(raw) {
 // ═══════════════════════════════════════
 // PARSER
 // ═══════════════════════════════════════
+function deinterleaveColumns(text) {
+  // Sabre prints in TWO side-by-side columns. When copied, both columns
+  // appear on the same line separated by large whitespace.
+  // Fix: split each line at the column midpoint, collect left lines first
+  // then right lines — giving a clean single-column stream.
+  const rawLines = text.split('\n');
+  const DATE_PAT = /\d{2}\s+(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)/i;
+
+  // Detect split column by finding where date tokens appear in right half
+  let splitCol = 44;
+  const rightPositions = [];
+  for (const line of rawLines) {
+    if (line.length < 50) continue;
+    const rightHalf = line.slice(40);
+    const m = rightHalf.match(DATE_PAT);
+    if (m) rightPositions.push(40 + m.index);
+  }
+  if (rightPositions.length > 0) {
+    splitCol = Math.max(38, Math.min(...rightPositions) - 2);
+  }
+
+  const leftLines = [], rightLines = [];
+  for (const line of rawLines) {
+    const left  = line.slice(0, splitCol).trimEnd();
+    const right = line.slice(splitCol).trimEnd();
+    if (left.trim())  leftLines.push(left.trim());
+    if (right.trim()) rightLines.push(right.trim());
+  }
+
+  return [...leftLines, ...rightLines].join('\n');
+}
+
 function parseSchedule(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  // De-interleave the two-column Sabre layout before parsing
+  const cleaned = deinterleaveColumns(text);
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
 
   // ── Header info ──
   let empNum='', firstName='', lastName='', base='', position='', line24='';
@@ -516,14 +550,16 @@ function parseSchedule(text) {
     }
 
     // Pairing line: "R7373 /0309 POS FO DAY 01 REPORT 1614"
-    const pm = first.match(/^(R\d+)\s+\/\d+\s+POS\s+\S+\s+DAY\s+(\d+)\s+REPORT\s+(\d+)/i);
+    // pairingId includes /MMDD suffix to distinguish R7390/0312 from R7390/0319
+    const pm = first.match(/^(R\d+)\s+\/(\d+)\s+POS\s+\S+\s+DAY\s+(\d+)\s+REPORT\s+(\d+)/i);
     if (pm) {
-      const pairing = pm[1].toUpperCase();
-      const dayNum  = parseInt(pm[2]);
-      const report  = pm[3];
+      const pairingCode = pm[1].toUpperCase();
+      const pairingId   = pairingCode + '/' + pm[2];
+      const dayNum      = parseInt(pm[3]);
+      const report      = pm[4];
 
       const legs=[], hotels=[];
-      let blkt='', tcrd='', tdty='', lyovTime='', lyovCity='', endsNext=false;
+      let blkt='', tcrd='', tdty='', lyovTime='', lyovCity='', dendTime='', endsNext=false;
 
       for (let i=1; i<block.length; i++) {
         const bl = block[i];
@@ -532,25 +568,30 @@ function parseSchedule(text) {
         const lm = bl.match(/^(\d{3,4})\s+([A-Z]{3})\s+([A-Z]{3})\s+(\d{4})\s+(\d{4})/);
         if (lm) { legs.push({flt:lm[1],from:lm[2],to:lm[3],dep:lm[4],arr:lm[5]}); continue; }
 
-        // D-END: "D-END 2154    BLKT 0638 TCRD 0638"
-        const dem = bl.match(/D-END\s+\d+\s+BLKT\s+(\d+)\s+TCRD\s+(\d+)/i);
-        if (dem) { blkt=dem[1]; tcrd=dem[2]; continue; }
+        // D-END: "D-END 2154    BLKT 0638 TCRD 0638" or "D-END 0006/10 BLKT 0621 TCRD 0621"
+        const dem = bl.match(/D-END\s+([\d\/]+)\s+BLKT\s+(\d+)\s+TCRD\s+(\d+)/i);
+        if (dem) { dendTime=dem[1].split('/')[0]; blkt=dem[2]; tcrd=dem[3]; continue; }
 
         // TDTY: "TDTY  0852 LYOV  1650 STL"
         const tm = bl.match(/TDTY\s+(\d+)(?:\s+LYOV\s+(\d+)\s+([A-Z]{3}))?/i);
         if (tm) { tdty=tm[1]; if(tm[2]){lyovTime=tm[2]; lyovCity=tm[3];} continue; }
 
-        // Hotel: any line with a phone number
+        // Hotel with (xxx)xxx-xxxx
         const hm = bl.match(/^(.+?)\s{2,}(\(\d{3}\)\d{3}-\d{4})/);
         if (hm) { hotels.push({name:hm[1].trim(), phone:hm[2]}); continue; }
+        // Hotel with 1 xxx-xxx-xxxx
+        const hm2 = bl.match(/^(.+?)\s{2,}(1\s+\d{3}-\d{3}-\d{4})/);
+        if (hm2) { hotels.push({name:hm2[1].trim(), phone:hm2[2]}); continue; }
 
         if (/PAIRING ENDS IN NEXT BID PERIOD/i.test(bl)) endsNext=true;
       }
 
       calDays[key] = {
         type: dayNum===1 ? 'pstart' : 'pcont',
-        pairing, dayNum, report,
-        legs, blkt, tcrd, tdty,
+        pairing: pairingCode,
+        pairingId,
+        dayNum, report,
+        legs, blkt, tcrd, tdty, dendTime,
         lyovTime, lyovCity, hotels, endsNext,
         hasLayover: !!lyovCity,
         isFinal: !lyovCity && tcrd!==''
@@ -562,26 +603,36 @@ function parseSchedule(text) {
   }
 
   // ── Second pass: link pairings, mark final days ──
-  const pairingGroups = {}; // code → [keys]
+  const pairingGroups = {}; // pairingId → [keys]
   for (const [key, day] of Object.entries(calDays)) {
-    if (!day.pairing) continue;
-    if (!pairingGroups[day.pairing]) pairingGroups[day.pairing]=[];
-    pairingGroups[day.pairing].push(key);
+    if (!day.pairingId) continue;
+    if (!pairingGroups[day.pairingId]) pairingGroups[day.pairingId]=[];
+    pairingGroups[day.pairingId].push(key);
   }
   for (const [code, keys] of Object.entries(pairingGroups)) {
     keys.sort();
     const lastKey = keys[keys.length-1];
     if (calDays[lastKey]) calDays[lastKey].isFinal = true;
-    // propagate totalCredit to all days of this pairing
-    const cred = calDays[lastKey]?.tcrd || '';
-    keys.forEach(k => { if(calDays[k]) calDays[k].totalCredit = cred; });
+    // Sum TCRD across ALL days of this pairing for the true total credit
+    let totalMins = 0;
+    keys.forEach(k => { if(calDays[k]?.tcrd) totalMins += tcrdToMinutes(calDays[k].tcrd); });
+    const totalH = Math.floor(totalMins/60);
+    const totalM = String(totalMins%60).padStart(2,'0');
+    const totalCreditStr = String(totalH).padStart(2,'0') + totalM;
+    const endsNext = keys.some(k => calDays[k]?.endsNext);
+    keys.forEach(k => {
+      if(calDays[k]) {
+        calDays[k].totalCredit = totalCreditStr;
+        calDays[k].creditPartial = endsNext; // flag: next-period day credit not included
+      }
+    });
   }
 
   // ── Mark prior bid vs this bid ──
   // A day is "prior bid" if its pairing STARTED in a different (prior) month
   for (const [key, day] of Object.entries(calDays)) {
-    if (!day.pairing) continue;
-    const keys = pairingGroups[day.pairing] || [];
+    if (!day.pairingId) continue;
+    const keys = pairingGroups[day.pairingId] || [];
     keys.sort();
     if (keys.length === 0) continue;
     const firstKey = keys[0];
@@ -662,7 +713,7 @@ function renderCalendar(data) {
   // ── Count pairings that belong to this bid ──
   const bidPairings = new Set();
   for (const [key, day] of Object.entries(calDays)) {
-    if (day.pairing && !day.priorBid) bidPairings.add(day.pairing);
+    if (day.pairingId && !day.priorBid) bidPairings.add(day.pairingId);
   }
 
   const nameStr = firstName && lastName ? `${firstName} ${lastName}` : (lastName || empNum);
@@ -734,7 +785,7 @@ function renderCalendar(data) {
         ${dayLabel}
         <div class="prior-stamp">PRIOR BID</div>
         <div class="pcode prior-c">${day.pairing}</div>
-        ${day.isFinal ? `<div class="trow"><span class="tv rel-prior">REL ${fmtTime(day.tdty)}</span></div>` : ''}
+        ${day.isFinal ? `<div class="trow"><span class="tv rel-prior">REL ${fmtTime(day.dendTime || day.tdty)}</span></div>` : ''}
         ${tt}
       </div>`;
     }
@@ -746,10 +797,11 @@ function renderCalendar(data) {
 
     const timeRow = isPstart
       ? `<div class="trow"><span class="tv rpt">RPT ${fmtTime(day.report)}</span></div>`
-      : (day.isFinal ? `<div class="trow"><span class="tv rel">REL ${fmtTime(day.tdty)}</span></div>` : '');
+      : (day.isFinal ? `<div class="trow"><span class="tv rel">REL ${fmtTime(day.dendTime || day.tdty)}</span></div>` : '');
 
     const badge  = day.lyovCity ? `<div class="lbadge">${day.lyovCity}</div>` : '';
-    const credit = day.isFinal && day.tcrd ? `<div class="cred">${fmtCredit(day.tcrd)} credit</div>` : '';
+    const creditLabel = day.creditPartial ? `~${fmtCredit(day.totalCredit)}` : `${fmtCredit(day.totalCredit)}`;
+    const credit = day.isFinal && day.totalCredit ? `<div class="cred">${creditLabel} credit${day.creditPartial ? '*' : ''}</div>` : '';
     const tt     = buildTooltip(day, dayNum, mo, yr);
 
     return `<div class="dc ${cls}${holCls}">
@@ -803,6 +855,7 @@ function renderCalendar(data) {
     if (seenCards.has(code)) continue;
     seenCards.add(code);
     const keys = (pairingGroups[code]||[]).filter(k => !calDays[k]?.priorBid).sort();
+    const displayCode = calDays[keys[0]]?.pairing || code.split('/')[0];
     if (!keys.length) continue;
 
     const firstKey = keys[0], lastKey = keys[keys.length-1];
@@ -830,13 +883,15 @@ function renderCalendar(data) {
 
     const firstDay = calDays[firstKey], lastDay = calDays[lastKey];
     const rpt    = fmtTime(firstDay?.report || '');
-    const rel    = fmtTime(lastDay?.tdty || '');
-    const credit = fmtCredit(lastDay?.tcrd || '');
+    const rel    = fmtTime(lastDay?.dendTime || lastDay?.tdty || '');
+    const isPartial = firstDay?.creditPartial;
+    const creditRaw = fmtCredit(firstDay?.totalCredit || lastDay?.totalCredit || '');
+    const credit = isPartial ? `~${creditRaw}` : creditRaw;
     const layovers = keys.map(k => calDays[k]?.lyovCity).filter(Boolean);
     const hasHol = keys.some(k => calDays[k]?.isHoliday);
 
     pCardHTML += `<div class="pcard">
-      <div class="pc-code">${code}</div>
+      <div class="pc-code">${displayCode}</div>
       <div class="pc-dates">${dateRange} &nbsp;·&nbsp; ${keys.length}-day &nbsp;·&nbsp; ${position}</div>
       <div class="route">${routeHTML}</div>
       <div class="pstats">
