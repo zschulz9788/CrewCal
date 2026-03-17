@@ -388,7 +388,7 @@ function parseSchedule(rawText) {
 
     // Pairing: "R7373 /0309 POS FO DAY 01 REPORT 1614"
     // pairingId = "R7373/0309" — unique per trip instance (same code can repeat in a month)
-    const pm = first.match(/^(R\d+)\s+\/(\d+)\s+POS\s+\S+\s+DAY\s+(\d+)\s+REPORT\s+(\d+)/i);
+    const pm = first.match(/^([A-Z]\d+)\s+\/(\d+)\s+POS\s+\S+\s+DAY\s+(\d+)\s+REPORT\s+(\d+)/i);
     if (pm) {
       const pCode = pm[1].toUpperCase();
       const pId   = pCode + '/' + pm[2];
