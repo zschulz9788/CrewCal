@@ -86,8 +86,18 @@ h1 span{color:var(--accent);}
 .dc.training{background:linear-gradient(160deg,#161a22,#171422);border-color:rgba(160,100,232,.35);}
 .dc.training::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#a064e8;border-radius:8px 8px 0 0;}
 .dc.training .dn{color:var(--text);}
+.dc.vacation{background:linear-gradient(160deg,#161a22,#121d1a);border-color:rgba(74,232,160,.35);}
+.dc.vacation::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);border-radius:8px 8px 0 0;}
+.dc.vacation .dn{color:var(--text);}
+.dc.gdo{background:var(--off-bg);border-color:rgba(90,96,112,.25);}
+.dc.gdo::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:#3a4050;border-radius:8px 8px 0 0;}
+.dc.gdo .dn{color:#3a4050;}
 .tcode{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.04em;color:#a064e8;line-height:1;margin-bottom:3px;}
+.tcode.vac{color:var(--green);}
+.tcode.gdo-c{color:#3a4050;}
 .tv.trn{color:rgba(160,100,232,.8);}
+.tv.vac{color:rgba(74,232,160,.7);}
+.tv.gdo-t{color:#3a4050;}
 .training-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(160,100,232,.5);margin-top:2px;}
 .dc.prior::before{display:none;}
 .dc.hol-worked::after{content:'★';position:absolute;top:6px;right:8px;font-size:8px;color:var(--green);opacity:.8;}
@@ -438,14 +448,21 @@ function parseSchedule(rawText) {
     }
 
     // Training day: "IRS  0800 1700    TCRD 0412"
-    const trm = first.match(/^([A-Z]{2,4})\s+(\d{4})\s+(\d{4})\s+TCRD\s+(\d{4})/i);
+    const trm = first.match(/^([A-Z][A-Z0-9]{1,3})\s+(\d{4})\s+(\d{4})\s+TCRD\s+(\d{4})/i);
     if (trm) {
+      const tCode = trm[1].toUpperCase();
+      const tcrd  = trm[4];
+      // Classify: vacation codes start with V, GDO = guaranteed day off, else training
+      const subtype = /^V\d/i.test(tCode) ? 'vacation'
+                    : tCode === 'GDO'      ? 'gdo'
+                    : 'training';
       calDays[key] = {
         type: 'training',
-        tCode: trm[1].toUpperCase(),
+        subtype,
+        tCode,
         startTime: trm[2],
         endTime: trm[3],
-        tcrd: trm[4]
+        tcrd
       };
       continue;
     }
@@ -534,11 +551,12 @@ function parseSchedule(rawText) {
   }
 
   // ── Base credit total ──
-  let baseMins = 0, trainingMins = 0;
+  let baseMins = 0, trainingMins = 0, vacationMins = 0;
   const seen = new Set();
   for (const [k, day] of Object.entries(calDays)) {
-    if (day.type === 'training' && day.tcrd) {
-      trainingMins += tcrdMins(day.tcrd);
+    if (day.type === 'training' && day.tcrd && day.tcrd !== '0000') {
+      if (day.subtype === 'vacation') vacationMins += tcrdMins(day.tcrd);
+      else trainingMins += tcrdMins(day.tcrd);
       continue;
     }
     if (!day.pCode || day.priorBid || !day.tcrd) continue;
@@ -546,7 +564,7 @@ function parseSchedule(rawText) {
     if (!seen.has(uid)) { seen.add(uid); baseMins += tcrdMins(day.tcrd); }
   }
   const holMins   = workedHols.length * HOLIDAY_BONUS_MIN;
-  const totalMins = baseMins + trainingMins + holMins;
+  const totalMins = baseMins + trainingMins + vacationMins + holMins;
 
   return {
     empNum, firstName, lastName, base, position,
@@ -554,7 +572,7 @@ function parseSchedule(rawText) {
     monthName: MONTH_NAMES[bidMonthIdx],
     daysInMonth, firstDOW,
     calDays, pGroups, holDays,
-    workedHols, baseMins, trainingMins, holMins, totalMins
+    workedHols, baseMins, trainingMins, vacationMins, holMins, totalMins
   };
 }
 
@@ -564,7 +582,7 @@ function parseSchedule(rawText) {
 function renderCalendar(data) {
   const {empNum,firstName,lastName,base,position,
          bidMonthIdx,bidYear,monthName,daysInMonth,firstDOW,
-         calDays,pGroups,holDays,workedHols,baseMins,trainingMins,holMins,totalMins} = data;
+         calDays,pGroups,holDays,workedHols,baseMins,trainingMins,vacationMins,holMins,totalMins} = data;
 
   // Unique bid pairings (not prior bid)
   const bidPairs = new Set();
@@ -616,13 +634,28 @@ function renderCalendar(data) {
       return `<div class="dc prior">${label}<div class="prior-stamp">PRIOR BID</div><div class="pcode prior-c">${day.pCode}</div>${day.isFinal?`<div class="trow"><span class="tv rel-p">REL ${fmtTime(day.dendTime)}</span></div>`:''}</div>`;
     }
     if (day.type === 'training') {
-      const holCls2 = holDays[key] ? ' hol-worked' : '';
-      const tt2 = `<div class="tt"><div class="tt-head"><div class="tt-code" style="color:#a064e8">${day.tCode}</div><div class="tt-meta">Training Day</div></div><hr class="tt-div"><div class="tt-row"><span class="tt-lbl">Start</span><span class="tt-val g">${fmtTime(day.startTime)}</span></div><div class="tt-row"><span class="tt-lbl">End</span><span class="tt-val b">${fmtTime(day.endTime)}</span></div><div class="tt-row"><span class="tt-lbl">Credit</span><span class="tt-val gr">${fmtCredit(day.tcrd)}</span></div></div>`;
-      return `<div class="dc training${holCls2}" onclick="tapCell(event,this)">
+      const isVac = day.subtype === 'vacation';
+      const isGdo = day.subtype === 'gdo';
+      const cellCls2 = isVac ? 'vacation' : isGdo ? 'gdo' : 'training';
+      const tcodeCls = isVac ? 'tcode vac' : isGdo ? 'tcode gdo-c' : 'tcode';
+      const tvCls    = isVac ? 'tv vac'    : isGdo ? 'tv gdo-t'    : 'tv trn';
+      const ttColor  = isVac ? '#4ae8a0'   : isGdo ? '#3a4050'     : '#a064e8';
+      const typeLabel = isVac ? 'Vacation' : isGdo ? 'GDO' : 'Training';
+      const holCls2  = holDays[key] ? ' hol-worked' : '';
+      const credLine = day.tcrd && day.tcrd !== '0000'
+        ? `<div class="cred">${fmtCredit(day.tcrd)} credit</div>` : '';
+      const tt2 = `<div class="tt">
+        <div class="tt-head">
+          <div class="tt-code" style="color:${ttColor}">${day.tCode}</div>
+          <div class="tt-meta">${typeLabel}</div>
+        </div>
+        <hr class="tt-div">
+        ${!isGdo ? `<div class="tt-row"><span class="tt-lbl">Credit</span><span class="tt-val gr">${fmtCredit(day.tcrd)}</span></div>` : '<div class="tt-row"><span class="tt-lbl">Credit</span><span class="tt-val">None</span></div>'}
+      </div>`;
+      return `<div class="dc ${cellCls2}${holCls2}" onclick="tapCell(event,this)">
         ${label}
-        <div class="tcode">${day.tCode}</div>
-        <div class="trow"><span class="tv trn">${fmtTime(day.startTime)}–${fmtTime(day.endTime)}</span></div>
-        <div class="cred">${fmtCredit(day.tcrd)} credit</div>
+        <div class="${tcodeCls}">${day.tCode}</div>
+        ${!isGdo ? `<div class="trow"><span class="${tvCls}">${typeLabel}</span></div>${credLine}` : `<div class="trow"><span class="${tvCls}">GDO</span></div>`}
         ${tt2}
       </div>`;
     }
@@ -737,6 +770,7 @@ function renderCalendar(data) {
   const statsHTML = `
     <div class="stat"><div class="stat-l">Pairings</div><div class="stat-v">${bidPairs.size}</div></div>
     <div class="stat"><div class="stat-l">Trip Credit</div><div class="stat-v">${minsToHHMM(baseMins)}</div></div>
+    ${vacationMins?`<div class="stat"><div class="stat-l">Vacation</div><div class="stat-v" style="color:var(--green)">+${minsToHHMM(vacationMins)}</div></div>`:''}
     ${trainingMins?`<div class="stat"><div class="stat-l">Training</div><div class="stat-v" style="color:#a064e8">+${minsToHHMM(trainingMins)}</div></div>`:''}
     ${holMins?`<div class="stat"><div class="stat-l">Holiday Bonus</div><div class="stat-v hol">+${minsToHHMM(holMins)}</div></div>`:''}
     ${holMins?`<div class="stat"><div class="stat-l">Total Credit</div><div class="stat-v">${minsToHHMM(totalMins)}</div></div>`:''}
@@ -756,7 +790,9 @@ function renderCalendar(data) {
       <div class="leg"><div class="leg-dot" style="background:var(--accent2)"></div>Pairing (even)</div>
       <div class="leg"><div class="leg-dot" style="background:#0e1016;border:1px solid #181c24"></div>Day Off</div>
       <div class="leg"><div class="leg-dot" style="background:#0c0e14;border:1px dashed #252a36"></div>Prior Bid</div>
+      <div class="leg"><div class="leg-dot" style="background:linear-gradient(160deg,#161a22,#121d1a);border:1px solid rgba(74,232,160,.35)"></div>Vacation</div>
       <div class="leg"><div class="leg-dot" style="background:linear-gradient(160deg,#161a22,#171422);border:1px solid rgba(160,100,232,.35)"></div>Training</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--off-bg);border:1px solid rgba(90,96,112,.25)"></div>GDO</div>
       ${workedHols.length?`<div class="leg"><div class="leg-dot" style="background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:7px;color:var(--green)">★</div>Holiday</div>`:''}
       <div class="leg" style="opacity:.5;font-size:10px;">Hover days for details</div>
     </div>
