@@ -583,7 +583,7 @@ function parseSchedule(rawText) {
     monthName: MONTH_NAMES[bidMonthIdx],
     daysInMonth, firstDOW,
     calDays, pGroups, holDays,
-    workedHols, baseMins, trainingMins, vacationMins, holMins, totalMins
+    workedHols, baseMins, trainingMins, vacationMins, reserveMins, holMins, totalMins
   };
 }
 
@@ -593,7 +593,7 @@ function parseSchedule(rawText) {
 function renderCalendar(data) {
   const {empNum,firstName,lastName,base,position,
          bidMonthIdx,bidYear,monthName,daysInMonth,firstDOW,
-         calDays,pGroups,holDays,workedHols,baseMins,trainingMins,vacationMins,holMins,totalMins} = data;
+         calDays,pGroups,holDays,workedHols,baseMins,trainingMins,vacationMins,reserveMins,holMins,totalMins} = data;
 
   // Unique bid pairings (not prior bid)
   const bidPairs = new Set();
